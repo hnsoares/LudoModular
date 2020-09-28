@@ -1,5 +1,5 @@
 class Peça:
-
+    # testando commit
     def __init__(self, id, cor):
         self.id = id
         self.cor = cor
