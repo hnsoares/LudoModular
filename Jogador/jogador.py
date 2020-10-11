@@ -1,4 +1,5 @@
-__all__ = ["cria_jogador", "set_id_jogador", "set_nome_jogador"]
+__all__ = ["cria_jogador", "set_id_jogador",
+           "set_nome_jogador", "get_nome_jogador", "get_id_jogador"]
 
 
 def cria_jogador(uid, nome):
