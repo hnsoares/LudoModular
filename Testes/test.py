@@ -2,10 +2,10 @@ import unittest
 from Jogador.jogador import *
 from Peca.peca import *
 from Casa.casa import *
+from tabuleiro import *
 
 
 class Testes_jogador(unittest.TestCase):
-
     def test_criar_jogador(self):
         jogador = cria_jogador(1, 'marcos')
         self.assertEqual(get_id_jogador(jogador), 1)
@@ -25,6 +25,13 @@ class Testes_casa(unittest.TestCase):
         self.assertEqual(get_casa_cor(casa), 'amarelo')
         self.assertEqual(get_casa_uid(casa), 1)
         self.assertEqual(get_casa_is_especial(casa), True)
+
+
+class Testes_tabuleiro(unittest.TestCase):
+    def test_cria_tabuleiro(self):
+        tabuleiro = []
+        criar_tabuleiro(4, tabuleiro)
+        self.assertEqual(tabuleiro, 1)
 
 
 if __name__ == '__main__':
