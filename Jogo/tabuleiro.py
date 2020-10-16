@@ -41,12 +41,12 @@ def criar_casas():
     return list_casa
 
 
-def cria_tabuleiro(numero_jog):  # numero_jog é um int e lista_pos é um array
+def cria_tabuleiro(numero_jog):  # numero_jog é um int
     '''
     --> Recebe o numero de jogadores e a lista de pos
-    <-- Retorna 1 se foi possivel criar a lista 
-    e 0 se ocorreu algum erro
+    <-- Retorna a lista de posições
     '''
+
     lista_pos = []
     if numero_jog > 4:
         return 0
@@ -65,6 +65,9 @@ def cria_tabuleiro(numero_jog):  # numero_jog é um int e lista_pos é um array
 
 
 def altera_tabuleiro(lista, uid, numero):
+    '''
+    Recebe lista de posições , id da peça, e numero de casas que deseja se mover
+    '''
     i = 0
     j = 0
     while i < len(lista):
@@ -73,7 +76,7 @@ def altera_tabuleiro(lista, uid, numero):
                 casa = lista[i]['pecas'][j]
                 lista[i+numero]['pecas'].append(casa)
                 del lista[i]['pecas'][j]
-                return 0
+                return 1 #Retorna 1 caso o processo tenha sido possível ser realizado
             j += 1
         i += 1
-    return 1
+    return 0 #Retorna 0 caso não encontre a peça desejada
