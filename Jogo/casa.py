@@ -6,6 +6,7 @@ def cria_casa(uid, cor, is_special):  # uid e cor sao int
     -->Recebe como parâmetro uid, cor e uma variavel booleana
     <--Retorna um dic com os respectivos parametros
     '''
+
     return {
         "uid": uid,
         "color": cor,
@@ -23,3 +24,11 @@ def get_casa_cor(casa):
 
 def get_casa_is_especial(casa):
     return casa['is_especial']
+
+
+def testa_casa(dic, key):
+    try:
+        dic[key]
+    except KeyError:
+        return 0
+    return 1

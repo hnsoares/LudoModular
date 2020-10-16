@@ -1,7 +1,7 @@
-__all__ = ["cria_tabuleiro"]
-from Peca.peca import *
-from Casa.casa import *
-specials = [48, 61, 74, 67]
+__all__ = ["cria_tabuleiro", "altera_tabuleiro"]
+import Jogo.peca
+import Jogo.casa
+specials = [40, 48, 53, 61, 66, 74, 79, 67]
 
 
 def criar_pecas(numero_jog):
@@ -10,9 +10,8 @@ def criar_pecas(numero_jog):
     k = 0
     list_peca = []
     while i < (4*numero_jog):
-
-        peca = cria_peca(i, k)
-        list_peca.append(peca)
+        pec = Jogo.peca.cria_peca(i, k)
+        list_peca.append(pec)
         j += 1
         if j % 4 == 0:
             j = 0
@@ -30,10 +29,10 @@ def criar_casas():
     while i < (92):
 
         if i in specials:
-            casa = cria_casa(i, k, True)
+            cas = Jogo.casa.cria_casa(i, k, True)
         else:
-            casa = cria_casa(i, k, False)
-        list_casa.append(casa)
+            cas = Jogo.casa.cria_casa(i, k, False)
+        list_casa.append(cas)
         j += 1
         if j % 23 == 0:
             j = 0
@@ -42,12 +41,13 @@ def criar_casas():
     return list_casa
 
 
-def cria_tabuleiro(numero_jog, lista_pos):  # numero_jog é um int e lista_pos é um array
+def cria_tabuleiro(numero_jog):  # numero_jog é um int e lista_pos é um array
     '''
     --> Recebe o numero de jogadores e a lista de pos
     <-- Retorna 1 se foi possivel criar a lista 
     e 0 se ocorreu algum erro
     '''
+    lista_pos = []
     if numero_jog > 4:
         return 0
     list_casa = criar_casas()
@@ -61,4 +61,19 @@ def cria_tabuleiro(numero_jog, lista_pos):  # numero_jog é um int e lista_pos �
     list_peca = criar_pecas(numero_jog)
     for i in range(len(list_peca)):
         lista_pos[i]["pecas"].append(list_peca[i])
+    return lista_pos
+
+
+def altera_tabuleiro(lista, uid, numero):
+    i = 0
+    j = 0
+    while i < len(lista):
+        while j < len(lista[i]['pecas']):
+            if lista[i]['pecas'][j]['uid'] == uid:
+                casa = lista[i]['pecas'][j]
+                lista[i+numero]['pecas'].append(casa)
+                del lista[i]['pecas'][j]
+                return 0
+            j += 1
+        i += 1
     return 1

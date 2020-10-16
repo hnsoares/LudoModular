@@ -6,6 +6,8 @@ def cria_peca(uid, cor):  # uid e cor sao int
     --> Recebe uid e cor
     <-- Retorna um dic
     '''
+    if cor not in range(4):
+        return 0
     return {
         "uid": uid,
         "color": cor

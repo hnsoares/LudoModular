@@ -6,7 +6,11 @@ def cria_jogador(uid, nome):  # uid é um int e nome é uma string
     '''
     --> Recebe uid e nome
     <-- Retorna dic com os respectivos campos
+    <-- Retorna 0 caso possua um caracter especial
     '''
+    for el in '#$%¨&*!@':
+        if el in nome:
+            return 0
     return {
         "id": uid,
         "nome": nome
