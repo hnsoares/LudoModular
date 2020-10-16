@@ -1,3 +1,9 @@
+'''
+Módulo feito por Henrique Soares
+iníco: 15/06/2020
+fim: 1/10/2020
+'''
+
 __all__ = ["cria_tabuleiro", "altera_tabuleiro"]
 import Jogo.peca
 import Jogo.casa

@@ -1,3 +1,10 @@
+'''
+Módulo feito por João Santana
+início: 16/09/2020
+fim: 20/09/2020
+'''
+
+
 __all__ = ["cria_peca", "get_peca_cor", "get_peca_uid"]
 
 

@@ -1,3 +1,9 @@
+'''
+Módulo feito por Henrique Soares
+início: 16/09/2020
+fim: 22/09/2020
+'''
+
 from random import *
 from Jogo.tabuleiro import cria_tabuleiro
 __all__ = ['cria_partida']

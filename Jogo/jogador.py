@@ -1,3 +1,9 @@
+'''
+Módulo feito por Marcos Vinicius
+início: 22/09/2020
+fim: 25/09/2020
+'''
+
 __all__ = ["cria_jogador"]
 
 

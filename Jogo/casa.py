@@ -1,3 +1,10 @@
+'''
+Módulo feito por Marcos Vinicius
+inicio: 18/09/2020
+fim: 22/09/2020
+'''
+
+
 __all__ = ["cria_casa", "get_casa_uid", "get_casa_cor", "get_casa_is_especial"]
 
 

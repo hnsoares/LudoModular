@@ -1,3 +1,9 @@
+'''
+Testes feitos por Marcos Vinicius
+início: 25/09/2020
+fim: 09/10/2020
+'''
+
 import unittest
 from unittest.mock import Mock
 from Jogo.jogador import cria_jogador
@@ -54,7 +60,7 @@ class TestPeca(unittest.TestCase):
 class TestPartida(unittest.TestCase):
     def test_cria_partida(self):
         jogadores = ['marcos', 'joao', 'henrique', 'flavio']
-        print('Para testar a função cria_partida, coloque 1 para o número de jogadores e "a" para o nome')
+        print('Para testar a função cria_partida, coloque 1 para o número de jogadores e "a" para o nome.')
         partida = cria_partida({})
         partida['lista_jogadores'] = jogadores
         self.assertEqual(partida['turno'], 0)
