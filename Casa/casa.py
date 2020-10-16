@@ -1,7 +1,11 @@
 __all__ = ["cria_casa", "get_casa_uid", "get_casa_cor", "get_casa_is_especial"]
 
 
-def cria_casa(uid, cor, is_special):
+def cria_casa(uid, cor, is_special):  # uid e cor sao int
+    '''
+    -->Recebe como parâmetro uid, cor e uma variavel booleana
+    <--Retorna um dic com os respectivos parametros
+    '''
     return {
         "uid": uid,
         "color": cor,

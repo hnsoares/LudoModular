@@ -1,5 +1,4 @@
 from Jogador.jogador import *
-from tabuleiro import *
 from random import *
 
 

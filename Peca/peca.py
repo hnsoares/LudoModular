@@ -1,7 +1,11 @@
 __all__ = ["cria_peca", "get_peca_cor", "get_peca_uid"]
 
 
-def cria_peca(uid, cor):
+def cria_peca(uid, cor):  # uid e cor sao int
+    '''
+    --> Recebe uid e cor
+    <-- Retorna um dic
+    '''
     return {
         "uid": uid,
         "color": cor

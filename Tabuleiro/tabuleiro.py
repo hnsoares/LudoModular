@@ -42,7 +42,14 @@ def criar_casas():
     return list_casa
 
 
-def cria_tabuleiro(numero_jog, lista_pos):
+def cria_tabuleiro(numero_jog, lista_pos):  # numero_jog é um int e lista_pos é um array
+    '''
+    --> Recebe o numero de jogadores e a lista de pos
+    <-- Retorna 1 se foi possivel criar a lista 
+    e 0 se ocorreu algum erro
+    '''
+    if numero_jog > 4:
+        return 0
     list_casa = criar_casas()
     for i in range(len(list_casa)):
         item = {
