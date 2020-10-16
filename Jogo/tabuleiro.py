@@ -76,7 +76,7 @@ def altera_tabuleiro(lista, uid, numero):
                 casa = lista[i]['pecas'][j]
                 lista[i+numero]['pecas'].append(casa)
                 del lista[i]['pecas'][j]
-                return 1 #Retorna 1 caso o processo tenha sido possível ser realizado
+                return 0 #Retorna 0 caso o processo tenha sido possível ser realizado
             j += 1
         i += 1
-    return 0 #Retorna 0 caso não encontre a peça desejada
+    return 1 #Retorna 1 caso não encontre a peça desejada

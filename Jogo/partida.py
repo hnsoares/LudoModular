@@ -4,7 +4,7 @@ __all__ = ['cria_partida']
 
 
 def lista_jogadores():
-    n = int(input("Jog?\n"))
+    n = int(input("Quantas pessoas irão jogar?\n"))
     lista = []
     for i in range(n):
         nome = input("nome: ")
