@@ -71,6 +71,10 @@ class TestSaveLoad(unittest.TestCase):
     def test_salva_partida(self):
         partida = cria_partida({})
         self.assertEqual(salva_partida(partida), 1, 'Salvando a partida...')
+
+    def test_carrega_partida(self):
+        partida = cria_partida({})
+        salva_partida(partida)
         partida2 = carrega_partida('partida.json')
         self.assertEqual(partida2, partida, 'Comparando a partida carregada com a original...')
 
