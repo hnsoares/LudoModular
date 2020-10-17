@@ -1,18 +1,32 @@
+'''
+Módulo feito por Marcos Vinicius
+inicio: 10/10/2020
+fim: 17/10/2020
+'''
+
+
 import json
 
-__all__ = ['salvar_partida']
+__all__ = ['salva_partida', 'carrega_partida']
 
 
-def salvar_partida(partida):
+def salva_partida(partida):
     '''
-    with open('./partida.json') as f:
-        lista_jogadores_json = json.dumps(partida['lista_jogadores'])
+    -->Recebe um dicionário partida
+    <--Retorna 1 se o processo foi concluido
     '''
-    arq = open('save.csv', 'w')
-    string = ''
-    for jogador in partida['lista_jogadores']:
-        string += str(jogador) + ','
+    arq = open('partida.json', "w", encoding='utf-8')
+    json.dump(partida, arq)
+    arq.close()
+    return 1
 
-    string = string[:-1] + '\n'
 
-    arq.write(string)
+def carrega_partida(arquivo):
+    '''
+    --> Recebe um arquivo .json que representa a partida
+    <-- Retorna a partida
+    '''
+    json_file = open(arquivo, "r", encoding="utf-8")
+    partida = json.load(json_file)
+    json_file.close()
+    return partida

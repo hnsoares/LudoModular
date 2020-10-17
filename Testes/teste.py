@@ -11,6 +11,7 @@ from Jogo.tabuleiro import cria_tabuleiro, altera_tabuleiro
 from Jogo.casa import cria_casa
 from Jogo.peca import cria_peca
 from Jogo.partida import cria_partida
+from Jogo.saveload import salva_partida, carrega_partida
 
 
 class TestJogador(unittest.TestCase):
@@ -65,6 +66,13 @@ class TestPartida(unittest.TestCase):
         partida['lista_jogadores'] = jogadores
         self.assertEqual(partida['turno'], 0)
         self.assertEqual(partida['lista_jogadores'],  jogadores)
+
+class TestSaveLoad(unittest.TestCase):
+    def test_salva_partida(self):
+        partida = cria_partida({})
+        self.assertEqual(salva_partida(partida), 1, 'Salvando a partida...')
+        partida2 = carrega_partida('partida.json')
+        self.assertEqual(partida2, partida, 'Comparando a partida carregada com a original...')
 
 if __name__ == '__main__':
     unittest.main()
