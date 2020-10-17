@@ -30,7 +30,7 @@ class TestTabuleiro(unittest.TestCase):
 
     def test_altera_tabuleiro(self):
         tabuleiro = cria_tabuleiro(4)
-        self.assertEqual(altera_tabuleiro(tabuleiro, 1, 4), 1, 'Acessando uma peça existente...')
+        self.assertEqual(altera_tabuleiro(tabuleiro, 0, 4), 0, 'Acessando uma peça existente...')
         self.assertEqual(altera_tabuleiro(tabuleiro, 20, 4), 1, 'Acessando um peça inexistente')
 
 class TestCasa(unittest.TestCase):
@@ -69,10 +69,12 @@ class TestPartida(unittest.TestCase):
 
 class TestSaveLoad(unittest.TestCase):
     def test_salva_partida(self):
+        print('Para testar a função cria_partida, coloque 1 para o número de jogadores e "a" para o nome.')
         partida = cria_partida({})
         self.assertEqual(salva_partida(partida), 1, 'Salvando a partida...')
 
     def test_carrega_partida(self):
+        print('Para testar a função cria_partida, coloque 1 para o número de jogadores e "a" para o nome.')
         partida = cria_partida({})
         salva_partida(partida)
         partida2 = carrega_partida('partida.json')
