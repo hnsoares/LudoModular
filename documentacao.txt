@@ -1,1 +1,32 @@
-﻿Teste
+﻿Módulo Casa
+    - cria_casa(uid, cor, is_special) ->
+        -->Recebe como parâmetro uid, cor e uma variavel booleana
+        <--Retorna um dic com os respectivos parametros
+Módulo Jogaodr
+    -cria_jogador(uid, nome):
+        --> Recebe uid e nome
+        <-- Retorna dic com os respectivos campos
+        <-- Retorna 0 caso possua um caracter especial
+Módulo Partida
+    - cria_partida(partida)
+        --->Recebe um dicionario partida
+        --->Retorna um dict com lista de jogadores, tabuleiro, lista do ranking, e o turno
+Módulo tabuleiro
+    cria_tabuleiro(numero_jog):
+        --> Recebe o numero de jogadores
+        <-- Retorna a lista de posições
+    -  altera_tabuleiro(lista, uid, numero)
+       -->Recebe lista de posições , id da peça, e numero de casas que deseja se mover
+       <--Retorna 0 caso o processo tenha sido possível ser realizado
+       <-- Retorna 1 caso não encontre a peça desejada
+Módulo peça
+    - cria_peca(uid, cor):
+        --> Recebe uid e cor
+        <-- Retorna um dic
+Módulo saveload
+    salva_partida(partida):
+        -->Recebe um dicionário partida
+        <--Retorna 1 quando o processo foi concluido
+    carrega_partida(arquivo):
+        --> Recebe um arquivo .json que representa a partida
+        <-- Retorna a partida

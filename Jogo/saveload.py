@@ -13,7 +13,7 @@ __all__ = ['salva_partida', 'carrega_partida']
 def salva_partida(partida):
     '''
     -->Recebe um dicionário partida
-    <--Retorna 1 se o processo foi concluido
+    <--Retorna 1 quando o processo foi concluido
     '''
     arq = open('partida.json', "w", encoding='utf-8')
     json.dump(partida, arq)
