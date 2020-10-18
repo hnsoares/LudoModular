@@ -1,0 +1,28 @@
+﻿Módulo casa
+    Módulo feito por Henrique Soares
+    iníco: 15/09/2020
+    fim: 1/10/2020
+Módulo jogador
+    Módulo feito por Marcos Vinicius
+    início: 22/09/2020
+    fim: 25/09/2020
+Módulo partida
+    Módulo feito por Henrique Soares
+    início: 16/09/2020
+    fim: 22/09/2020
+Módulo Peça
+    Módulo feito por João Santana
+    início: 16/09/2020
+    fim: 20/09/2020
+Módulo saveload
+    Módulo feito por Marcos Vinicius
+    inicio: 10/10/2020
+    fim: 17/10/2020
+Módulo Tabuleiro
+    Módulo feito por Henrique Soares
+    iníco: 15/06/2020
+    fim: 1/10/2020
+Testes:
+    Testes feitos por Marcos Vinicius
+    início: 25/09/2020
+    fim: 09/10/2020
