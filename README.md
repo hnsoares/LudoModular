@@ -22,12 +22,12 @@ requisitos
 * Save/Load do jogo
 
 Para fazer os testes, basta entrar na pasta ``Testes`` e rodar o arquivo ``teste.py``. Serão um total de 8 testes que serão 
-feitos para testar a eficiência do programa. Durante os testes você deve digitar no console o número de jogadores e 
-o nome do jogador. Para agilizar os testes, peço que coloque o número de jogadores como 1 e o nome do jogador como "a".
+feitos para testar a eficiência do programa. 
 Após isso todos os testes resultam em sucesso. No teste de salva_partiada, será criado um arquivo partida.json, para guardá-la.
-A documentação 
+A documentação pode ser encontrada como ``documentacao.txt`` que contem as documentações das funções.
 
-No arquivo ``main.py`` será exibida uma mensagem de confirmação de que a partida foi criada.
+
+Quando rodar a ``main.py``, será exibida uma mensagem de confirmação de que a partida foi criada.
 
 ### Github:
 
