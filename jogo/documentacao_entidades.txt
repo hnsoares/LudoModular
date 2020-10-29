@@ -1,0 +1,43 @@
+Peao:
+    limpar_peoes():
+        0 (sucesso)
+
+    criar_peao(cor):
+        <int> id (sucesso)
+
+    acessar_peao(id):
+        <string> cor (sucesso)
+        <string> ''  (falha)
+
+Tabuleiro:
+    iniciar_tabuleiro(n):
+        0 (sucesso)
+
+    adicionar_peoes(lista_ids, lista_posicoes=None):
+        0 (sucesso)
+        1 (id_repetido)
+        2 (lista_invalida)
+        3 (limite_maximo_atingido)
+
+    acessar_posicao(pos):
+        <list> lista_id
+        0 (casa_segura)
+
+    reiniciar_peao(id):
+        0 (sucesso)
+        -1 (nao existe o id)
+
+    movimentacao_possivel(id, mov):
+        0 (possivel)
+        1 (impossivel)
+        2 (finalizado)
+        -1 (id_nao_existe)
+
+    mover_peao(id, mov):
+        pos (sucesso)
+        -1 (id_nao_existe)
+        -2 (peao_finalizado)
+
+Dado:
+    jogar_dado():
+        <int> (sucesso)
