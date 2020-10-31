@@ -132,5 +132,8 @@ class TestesPartida(unittest.TestCase):
     # cor_da_rodada eh um gerador, nao uma funcao. Por isso nao ha testes
 
 
+
+
+
 if __name__ == '__main__':
     unittest.main()
