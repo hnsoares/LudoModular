@@ -107,6 +107,12 @@ def inicar_conexao():
 
     cursor = c.cursor()
 
+    # excluindo todas as tabelas antigas
+    for t in [_TABELA_PECAS, _TABELA_TABULEIRO]:
+        q = "DROP TABLE IF EXISTS %s" % t
+        cursor.execute(q)
+    c.commit()
+
     # criando a tabela para os peoes
     q = "CREATE TABLE %s (id INTEGER, cor VARCHAR(30), primary key (id))" % _TABELA_PECAS
     cursor.execute(q)
@@ -146,6 +152,57 @@ def fechar_conexao(c):
     return
 
 
+def adicionar_peao(c, id_peca, cor_peca):
+    """
+    Adiciona o peao e sua cor na tabela.
+    Retorna None.
+    """
+    cursor = c.cursor()
+    q = "INSERT INTO %s " % _TABELA_PECAS + " (id, cor) VALUES (%s, %s)"
+    val = (id_peca, cor_peca)
+    cursor.execute(q, val)
+    c.commit()
+    cursor.close()
+    return
+
+
+def selecionar_peca(c, peca):
+    """
+    Procura a cor daquele peca.
+    Retorna a cor se achar, ou '' se nao achar.
+    """
+    cursor = c.cursor()
+    q = "SELECT cor FROM %s WHERE id=%d" % (_TABELA_PECAS, peca)
+    cursor.execute(q)
+    r = cursor.fetchone()
+
+    cursor.close()
+    if r is None:
+        return ''
+    return r[0]
+
+
+def limpar_peao(c):
+    """Limpa a tabela com as pecas."""
+    cursor = c.cursor()
+    q = "DELETE FROM %s" % _TABELA_PECAS
+    cursor.execute(q)
+    c.commit()
+    cursor.close()
+    return
+
+
+# def adicionar_tabuleiro(c, peao, pos, pos_inicial, eh_inicio, eh_finalizado):
+#     pass
+
+
+# def selecionar_tabuleiro(c, peao=None, pos=None):
+#     pass
+
+
+# def limpar_tabuleiro(c):
+#    pass
+
+
 if __name__ == '__main__':
-    conexao = inicar_conexao()
-    fechar_conexao(conexao)
+    pass
