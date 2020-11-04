@@ -1,12 +1,12 @@
 import mysql.connector
 from mysql.connector import Error
 
-BD = "ludomodular"
-TABELA_PECAS = 'pecas'
-TABELA_TABULEIRO = 'tabuleiro'
+_BD = "ludomodular"
+_TABELA_PECAS = 'pecas'
+_TABELA_TABULEIRO = 'tabuleiro'
 
 
-def pegar_credenciais():
+def _pegar_credenciais():
     """
     Pega credenciais do BD em credenciais.txt
     O arquivo é estruturado da seguinte maneira:
@@ -22,13 +22,13 @@ def pegar_credenciais():
         return None
 
 
-def conectar_mysql_jogo():
+def _conectar_mysql_jogo():
     """
     Conecta com a base de dados do jogo a ser usado.
     Retorna 0 se sucesso.
     Retorna Error se nao conseguiu
     """
-    credenciais = pegar_credenciais()
+    credenciais = _pegar_credenciais()
     if credenciais is None:
         return None
     try:
@@ -36,21 +36,21 @@ def conectar_mysql_jogo():
             host=credenciais[0],
             user=credenciais[1],
             password=credenciais[2],
-            database=BD
+            database=_BD
         )
         return c
     except Error as e:
         return e
 
 
-def conectar_mysql():
+def _conectar_mysql():
     """
     Pega as credenciais e conecta com o BD.
     Retorna o objeto do conector se sucesso,
     retorna Error se falhou.
     """
 
-    credenciais = pegar_credenciais()
+    credenciais = _pegar_credenciais()
 
     if credenciais is None:
         return None
@@ -65,7 +65,7 @@ def conectar_mysql():
         return e
 
 
-def criar_bd_jogo(c):
+def _criar_bd_jogo(c):
     """
     Cria o BD a ser usado se ja nao existir.
     Recebe o connect do mysql geral.
@@ -78,28 +78,29 @@ def criar_bd_jogo(c):
     r = cursor.fetchall()
 
     for b in r:  # ('nome_bd',)
-        if BD in b:  # verifica se bd esta no nome acima
+        if _BD in b:  # verifica se bd esta no nome acima
             return 0  # pula fora
 
-    q = "CREATE DATABASE " + BD
+    q = "CREATE DATABASE " + _BD
     cursor.execute(q)
     cursor.close()
     return 1
 
 
 def inicar_conexao():
-    c = conectar_mysql_jogo()  # conecta diretamente ao BD do jogo
+    c = _conectar_mysql_jogo()  # conecta diretamente ao BD do jogo
     if c is Error:  # pode nao existir o BD jogo
-        c = conectar_mysql()
+        c = _conectar_mysql()
         if c is Error:  # nao conseguiu nem conectar sem ser no jogo
             print("Erro de conexao: ", c)
             return None
 
-        criar_bd_jogo(c)  # cria o BD do jogo
-        c = conectar_mysql_jogo()  # tenta novamente a conexao
+        _criar_bd_jogo(c)  # cria o BD do jogo
+        c.close()
+        c = _conectar_mysql_jogo()  # tenta novamente a conexao
 
     if c is Error:  # o erro nao era o BD do jogo...
-        print("Erro de conexao ", c)
+        print("Erro de conexao ao MySQL ", c)
         return None
 
     print("Conectado ao MySQL " + c.get_server_info())
@@ -107,7 +108,7 @@ def inicar_conexao():
     cursor = c.cursor()
 
     # criando a tabela para os peoes
-    q = "CREATE TABLE %s (id INTEGER, cor VARCHAR(30), primary key (id))" % TABELA_PECAS
+    q = "CREATE TABLE %s (id INTEGER, cor VARCHAR(30), primary key (id))" % _TABELA_PECAS
     cursor.execute(q)
     print("Tabela de peoes criada")
 
@@ -120,7 +121,7 @@ def inicar_conexao():
     eh_finalizado INTEGER,
     eh_inicio INTEGER,
     primary key (id))
-    """ % TABELA_TABULEIRO
+    """ % _TABELA_TABULEIRO
 
     cursor.execute(q)
     print("Tabela de tabuleiro criada")
