@@ -153,10 +153,7 @@ def fechar_conexao(c):
 
 
 def adicionar_peao(c, id_peca, cor_peca):
-    """
-    Adiciona o peao e sua cor na tabela.
-    Retorna None.
-    """
+    """Adiciona o peao e sua cor na tabela."""
     cursor = c.cursor()
     q = "INSERT INTO %s " % _TABELA_PECAS + " (id, cor) VALUES (%s, %s)"
     val = (id_peca, cor_peca)
@@ -192,16 +189,79 @@ def limpar_peao(c):
     return
 
 
-# def adicionar_tabuleiro(c, peao, pos, pos_inicial, eh_inicio, eh_finalizado):
-#     pass
+def adicionar_tabuleiro(c, peca, pos, pos_inicial, eh_inicio, eh_finalizado):
+    """Adiciona o peao e suas informacoes na tabela do tabuleiro."""
+    cursor = c.cursor()
+    q = "INSERT INTO %s " % _TABELA_TABULEIRO +\
+        "(id, pos, pos_inicial, eh_finalizado, eh_inicio) VALUES (%s, %s, %s, %s, %s)"
+
+    val = (peca, pos, pos_inicial, 1 if eh_inicio else 0, 1 if eh_finalizado else 0)
+    cursor.execute(q, val)
+    c.commit()
+    cursor.close()
+    return
 
 
-# def selecionar_tabuleiro(c, peao=None, pos=None):
-#     pass
+def _converter_tupla_dic(tupla):
+    """Converte a tupla de um elemento do tabuleiro em um dicionario."""
+    # (id, pos, pos_inicial, eh_finalizado, eh_inicio)
+    d = dict()
+    d['id'] = tupla[0]
+    d['pos'] = tupla[1]
+    d['pos_inicial'] = tupla[2]
+    d['eh_finalizado'] = True if tupla[3] == 1 else False
+    d['eh_inicio'] = True if tupla[4] == 1 else False
+
+    return d
 
 
-# def limpar_tabuleiro(c):
-#    pass
+def selecionar_tabuleiro(c, peca=None, pos=None):
+    """Retorna um dicionario com os dados do peao no tabuleiro, ou None se nao existir aquele peao/pos."""
+    cursor = c.cursor()
+    if peca is not None:
+        q = "SELECT * FROM %s WHERE id=%d" % (_TABELA_TABULEIRO, peca)
+        cursor.execute(q)
+        r = cursor.fetchone()
+        cursor.close()
+
+        if r is None:
+            return -1
+        return _converter_tupla_dic(r)
+
+    # vendo pela posicao
+    q = "SELECT * FROM %s WHERE pos=%d" % (_TABELA_TABULEIRO, pos)
+    cursor.execute(q)
+    r = cursor.fetchall()
+    cursor.close()
+    for i in range(len(r)):
+        r[i] = _converter_tupla_dic(r[i])
+
+    return r
+
+
+def modificar_tabuleiro(c, peca, pos, pos_inicial, eh_finalizado, eh_inicio):
+    """Atualiza a peca com essas informacoes."""
+    cursor = c.cursor()
+
+    # remove peca do tabuleiro
+    q = "DELETE FROM %s WHERE id=%d" % (_TABELA_TABULEIRO, peca)
+    cursor.execute(q)
+
+    # adiciona ela novamente
+    adicionar_tabuleiro(c, peca, pos, pos_inicial, eh_finalizado, eh_inicio)
+
+    cursor.close()
+    return
+
+
+def limpar_tabuleiro(c):
+    """Limpa a tabela com as pecas no tabuleiro."""
+    cursor = c.cursor()
+    q = "DELETE FROM %s" % _TABELA_TABULEIRO
+    cursor.execute(q)
+    c.commit()
+    cursor.close()
+    return
 
 
 if __name__ == '__main__':
