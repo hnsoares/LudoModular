@@ -1,9 +1,11 @@
 import mysql.connector
 from mysql.connector import Error
+from os import path, sep  # so para as credenciais funcionarem
+
 
 _BD = "ludomodular"
-_TABELA_PECAS = 'pecas'
-_TABELA_TABULEIRO = 'tabuleiro'
+TABELA_PECAS = 'pecas'
+TABELA_TABULEIRO = 'tabuleiro'
 
 
 def _pegar_credenciais():
@@ -14,11 +16,13 @@ def _pegar_credenciais():
     'user'
     password'
     """
+    p = path.dirname(path.abspath(__file__)) + sep
+
     try:
-        with open('credenciais.txt', 'r') as f:
+        with open(p + '/credenciais.txt', 'r') as f:
             return f.read().split('\n')
     except Exception as e:
-        print("Nao consegui pegar credenciais do BD: " % e)
+        print("Erro lendo arquivo: ", e)
         return None
 
 
@@ -87,8 +91,47 @@ def _criar_bd_jogo(c):
     return 1
 
 
+def iniciar_tabelas(c):
+    """Cria as tabelas no Banco de Dados."""
+
+    cursor = c.cursor()
+
+    # excluindo todas as tabelas antigas
+    for t in [TABELA_PECAS, TABELA_TABULEIRO]:
+        q = "DROP TABLE IF EXISTS %s" % t
+        cursor.execute(q)
+    c.commit()
+
+    # criando a tabela para os peoes
+    q = "CREATE TABLE %s (id INTEGER, cor VARCHAR(30), primary key (id))" % TABELA_PECAS
+    cursor.execute(q)
+    print("Tabela de peoes criada")
+
+    # criando a tabela para o tabuleiro
+    q = """
+    CREATE TABLE %s (
+    id INTEGER, 
+    pos INTEGER, 
+    pos_inicial INTEGER,
+    eh_finalizado INTEGER,
+    eh_inicio INTEGER,
+    primary key (id))
+    """ % TABELA_TABULEIRO
+
+    cursor.execute(q)
+    print("Tabela de tabuleiro criada")
+
+    c.commit()
+    cursor.close()
+    return
+
+
 def inicar_conexao():
+    """Estabelece uma conexao com o banco de dados."""
     c = _conectar_mysql_jogo()  # conecta diretamente ao BD do jogo
+    if c is None:  # erro de leitura de arquivo
+        return None
+
     if c is Error:  # pode nao existir o BD jogo
         c = _conectar_mysql()
         if c is Error:  # nao conseguiu nem conectar sem ser no jogo
@@ -105,35 +148,8 @@ def inicar_conexao():
 
     print("Conectado ao MySQL " + c.get_server_info())
 
-    cursor = c.cursor()
+    iniciar_tabelas(c)
 
-    # excluindo todas as tabelas antigas
-    for t in [_TABELA_PECAS, _TABELA_TABULEIRO]:
-        q = "DROP TABLE IF EXISTS %s" % t
-        cursor.execute(q)
-    c.commit()
-
-    # criando a tabela para os peoes
-    q = "CREATE TABLE %s (id INTEGER, cor VARCHAR(30), primary key (id))" % _TABELA_PECAS
-    cursor.execute(q)
-    print("Tabela de peoes criada")
-
-    # criando a tabela para o tabuleiro
-    q = """
-    CREATE TABLE %s (
-    id INTEGER, 
-    pos INTEGER, 
-    pos_inicial INTEGER,
-    eh_finalizado INTEGER,
-    eh_inicio INTEGER,
-    primary key (id))
-    """ % _TABELA_TABULEIRO
-
-    cursor.execute(q)
-    print("Tabela de tabuleiro criada")
-
-    c.commit()
-    cursor.close()
     return c
 
 
@@ -155,7 +171,7 @@ def fechar_conexao(c):
 def adicionar_peao(c, id_peca, cor_peca):
     """Adiciona o peao e sua cor na tabela."""
     cursor = c.cursor()
-    q = "INSERT INTO %s " % _TABELA_PECAS + " (id, cor) VALUES (%s, %s)"
+    q = "INSERT INTO %s " % TABELA_PECAS + " (id, cor) VALUES (%s, %s)"
     val = (id_peca, cor_peca)
     cursor.execute(q, val)
     c.commit()
@@ -169,7 +185,7 @@ def selecionar_peca(c, peca):
     Retorna a cor se achar, ou '' se nao achar.
     """
     cursor = c.cursor()
-    q = "SELECT cor FROM %s WHERE id=%d" % (_TABELA_PECAS, peca)
+    q = "SELECT cor FROM %s WHERE id=%d" % (TABELA_PECAS, peca)
     cursor.execute(q)
     r = cursor.fetchone()
 
@@ -182,7 +198,7 @@ def selecionar_peca(c, peca):
 def limpar_peao(c):
     """Limpa a tabela com as pecas."""
     cursor = c.cursor()
-    q = "DELETE FROM %s" % _TABELA_PECAS
+    q = "DELETE FROM %s" % TABELA_PECAS
     cursor.execute(q)
     c.commit()
     cursor.close()
@@ -192,7 +208,7 @@ def limpar_peao(c):
 def adicionar_tabuleiro(c, peca, pos, pos_inicial, eh_inicio, eh_finalizado):
     """Adiciona o peao e suas informacoes na tabela do tabuleiro."""
     cursor = c.cursor()
-    q = "INSERT INTO %s " % _TABELA_TABULEIRO +\
+    q = "INSERT INTO %s " % TABELA_TABULEIRO +\
         "(id, pos, pos_inicial, eh_finalizado, eh_inicio) VALUES (%s, %s, %s, %s, %s)"
 
     val = (peca, pos, pos_inicial, 1 if eh_inicio else 0, 1 if eh_finalizado else 0)
@@ -219,7 +235,7 @@ def selecionar_tabuleiro(c, peca=None, pos=None):
     """Retorna um dicionario com os dados do peao no tabuleiro, ou None se nao existir aquele peao/pos."""
     cursor = c.cursor()
     if peca is not None:
-        q = "SELECT * FROM %s WHERE id=%d" % (_TABELA_TABULEIRO, peca)
+        q = "SELECT * FROM %s WHERE id=%d" % (TABELA_TABULEIRO, peca)
         cursor.execute(q)
         r = cursor.fetchone()
         cursor.close()
@@ -229,7 +245,7 @@ def selecionar_tabuleiro(c, peca=None, pos=None):
         return _converter_tupla_dic(r)
 
     # vendo pela posicao
-    q = "SELECT * FROM %s WHERE pos=%d" % (_TABELA_TABULEIRO, pos)
+    q = "SELECT * FROM %s WHERE pos=%d" % (TABELA_TABULEIRO, pos)
     cursor.execute(q)
     r = cursor.fetchall()
     cursor.close()
@@ -244,7 +260,7 @@ def modificar_tabuleiro(c, peca, pos, pos_inicial, eh_finalizado, eh_inicio):
     cursor = c.cursor()
 
     # remove peca do tabuleiro
-    q = "DELETE FROM %s WHERE id=%d" % (_TABELA_TABULEIRO, peca)
+    q = "DELETE FROM %s WHERE id=%d" % (TABELA_TABULEIRO, peca)
     cursor.execute(q)
 
     # adiciona ela novamente
@@ -257,7 +273,7 @@ def modificar_tabuleiro(c, peca, pos, pos_inicial, eh_finalizado, eh_inicio):
 def limpar_tabuleiro(c):
     """Limpa a tabela com as pecas no tabuleiro."""
     cursor = c.cursor()
-    q = "DELETE FROM %s" % _TABELA_TABULEIRO
+    q = "DELETE FROM %s" % TABELA_TABULEIRO
     cursor.execute(q)
     c.commit()
     cursor.close()
