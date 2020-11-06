@@ -192,7 +192,7 @@ def selecionar_peca(c, peca):
     cursor.close()
     if r is None:
         return ''
-    return r
+    return r[0]
 
 
 def limpar_peao(c):
