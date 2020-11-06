@@ -192,7 +192,7 @@ def selecionar_peca(c, peca):
     cursor.close()
     if r is None:
         return ''
-    return r[0]
+    return r
 
 
 def limpar_peao(c):
@@ -209,7 +209,7 @@ def adicionar_tabuleiro(c, peca, pos, pos_inicial, eh_inicio, eh_finalizado):
     """Adiciona o peao e suas informacoes na tabela do tabuleiro."""
     cursor = c.cursor()
     q = "INSERT INTO %s " % TABELA_TABULEIRO +\
-        "(id, pos, pos_inicial, eh_finalizado, eh_inicio) VALUES (%s, %s, %s, %s, %s)"
+        "(id, pos, pos_inicial, eh_inicio, eh_finalizado) VALUES (%s, %s, %s, %s, %s)"
 
     val = (peca, pos, pos_inicial, 1 if eh_inicio else 0, 1 if eh_finalizado else 0)
     cursor.execute(q, val)
@@ -232,7 +232,7 @@ def _converter_tupla_dic(tupla):
 
 
 def selecionar_tabuleiro(c, peca=None, pos=None):
-    """Retorna um dicionario com os dados do peao no tabuleiro, ou None se nao existir aquele peao/pos."""
+    """Retorna um dicionario com os dados do peao no tabuleiro, ou -1 se nao existir aquele peao/pos."""
     cursor = c.cursor()
     if peca is not None:
         q = "SELECT * FROM %s WHERE id=%d" % (TABELA_TABULEIRO, peca)
