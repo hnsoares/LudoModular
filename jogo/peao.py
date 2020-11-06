@@ -13,19 +13,22 @@ acessar_peao()
 06/10 (Daniel): Atualizando acessar_peao
 """
 
-peoes = []
+from dados import baseDados
+
+# peoes = []
 id_peao_atual = 0
 
 
-def limpar_peoes():
+def limpar_peoes(c):
     """Limpa todos os peoes salvos. Retorna 0."""
     global id_peao_atual
-    peoes.clear()
+    # peoes.clear()
+    baseDados.limpar_peao(c)
     id_peao_atual = 0
     return 0
 
 
-def criar_peao(cor):
+def criar_peao(c, cor):
     """Cria um peao. Retorna seu id."""
     global id_peao_atual
     peao = dict()
@@ -33,16 +36,17 @@ def criar_peao(cor):
     peao['id'] = id_peao_atual
     id_peao_atual += 1
     peao['cor'] = cor
-    peoes.append(peao)
+    # peoes.append(peao)
+    baseDados.adicionar_peao(c, peao['id'], peao['cor'])
     return peao['id']
 
 
-def acessar_peao(id_peao):
+def acessar_peao(c, id_peao):
     """Acessa a cor do peao. Retorna:
     cor
     string vazia se nao existir esse id.
     """
-    for p in peoes:
-        if p['id'] == id_peao:
-            return p['cor']
-    return ''
+    # for p in peoes:
+    #     if p['id'] == id_peao:
+    #         return p['cor']
+    return baseDados.selecionar_peca(c, id_peao)
