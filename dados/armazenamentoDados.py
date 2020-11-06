@@ -13,7 +13,7 @@ PATH = path.dirname(path.abspath(__file__)) + sep + 'arquivos' + sep
 ARQUIVO_PARTIDA = 'partida.xml'
 
 
-def converte_objeto(o, tipo):
+def _converte_objeto(o, tipo):
     """Recebe o tipo de objeto e converte."""
     if tipo == 'str':
         return str(o)
@@ -26,7 +26,7 @@ def converte_objeto(o, tipo):
     return None
 
 
-def coletar_pecas(c):
+def _coletar_pecas(c):
     """Pega uma lista com todas as pecas."""
     cursor = c.cursor(dictionary=True)
     q = "SELECT * FROM %s" % baseDados.TABELA_PECAS
@@ -36,7 +36,7 @@ def coletar_pecas(c):
     return r
 
 
-def coletar_tabuleiro(c):
+def _coletar_tabuleiro(c):
     """Pega uma lista com todas as pecas no tabuleiro."""
     cursor = c.cursor(dictionary=True)
     q = "SELECT * FROM %s" % baseDados.TABELA_TABULEIRO
@@ -46,7 +46,7 @@ def coletar_tabuleiro(c):
     return r
 
 
-def formata_xml(xml):
+def _formata_xml(xml):
     # copia dos slides 15
     s1 = ET.tostring(xml, 'utf-8')
     s2 = minidom.parseString(s1)
@@ -59,8 +59,8 @@ def salvar_partida_completa(c, dados=None):
     dados eh um dicionario com informacoes genericas. Deve ser chave -> int/float/string
     """
 
-    pecas = coletar_pecas(c)  # coleta as pecas do BD
-    tabuleiro = coletar_tabuleiro(c)  # coleta as pecas no tabuleiro do BD
+    pecas = _coletar_pecas(c)  # coleta as pecas do BD
+    tabuleiro = _coletar_tabuleiro(c)  # coleta as pecas no tabuleiro do BD
 
     jogo = ET.Element('jogo')  # topo do xml
     jogo.append(ET.Comment("Dados de uma partida de ludo"))
@@ -93,7 +93,7 @@ def salvar_partida_completa(c, dados=None):
                 elemento_dado.text = str(dados[d])
                 elemento_dado.set('tipo', str(type(dados[d]).__name__))
 
-    saida = formata_xml(jogo)  # copia dos slides 15
+    saida = _formata_xml(jogo)  # copia dos slides 15
     with open(PATH + ARQUIVO_PARTIDA, "w+") as f:
         f.write(saida)
 
@@ -137,7 +137,7 @@ def recupera_partida_completa(c):
             # tag = nome do atributo
             # text = conteudo do atributo
             # attrib['tipo'] = tipo do atributo para converter
-            d[atr.tag] = converte_objeto(atr.text, atr.attrib['tipo'])
+            d[atr.tag] = _converte_objeto(atr.text, atr.attrib['tipo'])
         lista_pecas.append(d)
 
     # ESCREVENDO NA BASE DE DADOS
@@ -153,7 +153,7 @@ def recupera_partida_completa(c):
             # tag = nome do atributo
             # text = conteudo do atributo
             # attrib['tipo'] = tipo do atributo para converter
-            d[atr.tag] = converte_objeto(atr.text, atr.attrib['tipo'])
+            d[atr.tag] = _converte_objeto(atr.text, atr.attrib['tipo'])
         lista_tabuleiro.append(d)
 
     # ESCREVENDO NA BASE DE DADOS
@@ -171,7 +171,7 @@ def recupera_partida_completa(c):
     dicionario_dados = dict()
     for dado in dados:
         # print(dado.tag, dado.attrib['tipo'], dado.text)
-        dicionario_dados[dado.tag] = converte_objeto(dado.text, dado.attrib['tipo'])
+        dicionario_dados[dado.tag] = _converte_objeto(dado.text, dado.attrib['tipo'])
 
     return dicionario_dados
 
