@@ -1,4 +1,5 @@
 .idea/
 venv/
 pycache/
-dados/credenciais.txt
+dados/arquivos/credenciais.txt
+dados/arquivos/partida.xml

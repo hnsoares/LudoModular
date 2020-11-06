@@ -16,10 +16,10 @@ def _pegar_credenciais():
     'user'
     password'
     """
-    p = path.dirname(path.abspath(__file__)) + sep
+    p = path.dirname(path.abspath(__file__)) + sep + 'arquivos' + sep
 
     try:
-        with open(p + '/credenciais.txt', 'r') as f:
+        with open(p + 'credenciais.txt', 'r') as f:
             return f.read().split('\n')
     except Exception as e:
         print("Erro lendo arquivo: ", e)
