@@ -1,33 +1,33 @@
-import pygame
+from tkinter import *
+from tkinter.ttk import *
+from jogo.partida import rodar_partida
+__all__ = ['cria_menu']
 
-__all__ = ['Button']
+def testa_numero(root, num):
+    if num != 'Escolha o número de jogadores':
+        root.destroy()
+        rodar_partida()
+    else:
+        print('Valor inválido!')
 
-class Button():
-    def __init__(self, color, x, y, width, height, text=''):
-        self.color = color
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.text = text
+def fechar_jogo():
+    exit(1)
+    return 1
 
-    def draw(self, janela, outline=None):
-        if outline:
-            pygame.draw.rect(janela, outline, (self.x - 2, self.y - 2, self.width + 4, self.height + 4), 0)
+def cria_menu():
+    root = Tk()
+    WIDTH = 600
+    HEIGHT = 400
+    format = str(WIDTH) + 'x' + str(HEIGHT)
+    root.geometry(format)
+    root.title('LUDO')
+    combo = Combobox(root, width=29)
+    combo['values'] = ('Escolha o número de jogadores', 2, 3, 4)
+    combo.current(0)
+    iniciar_button = Button(root, text='Iniciar', command= lambda : testa_numero(root, combo.get()), width=20)
+    fechar = Button(root, text='Fechar', command=fechar_jogo, width=20)
 
-        pygame.draw.rect(janela, self.color, (self.x, self.y, self.width, self.height), 0)
-
-        if self.text != '':
-            font = pygame.font.SysFont('comicsans', 60)
-            text = font.render(self.text, 1, (0, 0, 0))
-            janela.blit(text, (
-            self.x + (self.width / 2 - text.get_width() / 2), self.y + (self.height / 2 - text.get_height() / 2)))
-
-    def isOver(self, pos):
-        # Pos is the mouse position or a tuple of (x,y) coordinates
-        if pos[0] > self.x and pos[0] < self.x + self.width:
-            if pos[1] > self.y and pos[1] < self.y + self.height:
-                return True
-
-        return False
-
+    iniciar_button.place(x=WIDTH/2 - 70, y=HEIGHT*5/7 - 30)
+    fechar.place(x=WIDTH/2 - 70, y=HEIGHT*5/7 + 30)
+    combo.place(x=WIDTH/2 - 100, y=HEIGHT*5/7 - 100)
+    root.mainloop()
