@@ -16,10 +16,13 @@ mover_peao()
 from jogo import dado
 from jogo import peao
 from jogo import tabuleiro
+from dados import baseDados
+from dados import armazenamentoDados
 # from unittest.mock import Mock
 
 LISTA_CORES = ['yellow', 'green', 'red', 'blue']
 peoes_cor = dict()
+conexao_bd = None  # conexao com BD a ser feita
 
 # escolher_peao = Mock(return_value=0)
 
@@ -39,16 +42,18 @@ def criar_partida():
     Inicializa a partida, criando os peoes e jogadores.
     Retorna 0.
     """
+    global conexao_bd
 
-    peao.limpar_peoes()
+    conexao_bd = baseDados.inicar_conexao()
+    peao.limpar_peoes(conexao_bd)
     peoes_cor.clear()
-    tabuleiro.iniciar_tabuleiro(len(LISTA_CORES))  # 4 cores
+    tabuleiro.iniciar_tabuleiro(conexao_bd, len(LISTA_CORES))  # 4 cores
 
     for cor in LISTA_CORES:
         peoes_cor[cor] = list()
         for i in range(4):
-            peoes_cor[cor].append(peao.criar_peao(cor))
-        tabuleiro.adicionar_peoes(peoes_cor[cor])
+            peoes_cor[cor].append(peao.criar_peao(conexao_bd, cor))
+        tabuleiro.adicionar_peoes(conexao_bd, peoes_cor[cor])
 
     return 0
 
@@ -62,6 +67,7 @@ def rodada(cor):
     0 se foi sucesso,
     levanta erro caso erro.
     """
+    global conexao_bd
 
     jogar_novamente = False
     # rodando dado
@@ -75,7 +81,7 @@ def rodada(cor):
     lista_peoes_possiveis = []
     peoes_finalizados = 0
     for p in lista_peoes:
-        x = tabuleiro.movimentacao_possivel(p, valor_dado)
+        x = tabuleiro.movimentacao_possivel(conexao_bd, p, valor_dado)
         if x == -1:
             raise Exception("IdNaoExiste")
         if x == 0:
@@ -94,7 +100,7 @@ def rodada(cor):
     print("Escolhido o peao %d" % i)
 
     # movendo o peao
-    posicao_final = tabuleiro.mover_peao(peao_pra_mover, valor_dado)
+    posicao_final = tabuleiro.mover_peao(conexao_bd, peao_pra_mover, valor_dado)
     if posicao_final == -1:
         raise Exception("IdNaoExiste2")
 
@@ -104,17 +110,17 @@ def rodada(cor):
     print("Peao movido para a posicao %d" % posicao_final)
 
     # verificar peao comido
-    lista_peoes_posicao = tabuleiro.acessar_posicao(posicao_final)
+    lista_peoes_posicao = tabuleiro.acessar_posicao(conexao_bd, posicao_final)
     if lista_peoes_posicao == 0:  # casa protegida, nao come
         return 0 if not jogar_novamente else 3
 
     for p in lista_peoes_posicao:
-        cor_p = peao.acessar_peao(p)
+        cor_p = peao.acessar_peao(conexao_bd, p)
         if cor_p == cor:  # se for da mesma cor, esquece
             continue
         else:
             print("Peao comido: %d" % p)
-            tabuleiro.reiniciar_peao(p)  # comeu o peao
+            tabuleiro.reiniciar_peao(conexao_bd, p)  # comeu o peao
             jogar_novamente = True
 
     if jogar_novamente:
@@ -150,6 +156,14 @@ def rodar_partida():
             print("Voce nao pode jogar nesta rodada.\n")
         else:
             print("Jogada realizada com sucesso. \n")
+            temp = input("Deseja salvar a partida? (y/n): ")
+            if temp == 'y':
+                armazenamentoDados.salvar_partida_completa(conexao_bd)
 
     print("%s ganhou" % cor)
     return 0
+
+
+if __name__ == '__main__':
+    rodar_partida()
+    baseDados.fechar_conexao(conexao_bd)
