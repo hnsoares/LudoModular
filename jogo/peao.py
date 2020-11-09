@@ -49,4 +49,4 @@ def acessar_peao(c, id_peao):
     # for p in peoes:
     #     if p['id'] == id_peao:
     #         return p['cor']
-    return baseDados.selecionar_peca(c, id_peao)
+    return baseDados.selecionar_peao(c, id_peao)

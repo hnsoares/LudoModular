@@ -26,10 +26,10 @@ def _converte_objeto(o, tipo):
     return None
 
 
-def _coletar_pecas(c):
-    """Pega uma lista com todas as pecas."""
+def _coletar_peoes(c):
+    """Pega uma lista com todas as peoes."""
     cursor = c.cursor(dictionary=True)
-    q = "SELECT * FROM %s" % baseDados.TABELA_PECAS
+    q = "SELECT * FROM %s" % baseDados.TABELA_PEOES
     cursor.execute(q)
     r = cursor.fetchall()
     cursor.close()
@@ -37,7 +37,7 @@ def _coletar_pecas(c):
 
 
 def _coletar_tabuleiro(c):
-    """Pega uma lista com todas as pecas no tabuleiro."""
+    """Pega uma lista com todas as peoes no tabuleiro."""
     cursor = c.cursor(dictionary=True)
     q = "SELECT * FROM %s" % baseDados.TABELA_TABULEIRO
     cursor.execute(q)
@@ -59,17 +59,17 @@ def salvar_partida_completa(c, dados=None):
     dados eh um dicionario com informacoes genericas. Deve ser chave -> int/float/string
     """
 
-    pecas = _coletar_pecas(c)  # coleta as pecas do BD
-    tabuleiro = _coletar_tabuleiro(c)  # coleta as pecas no tabuleiro do BD
+    peoes = _coletar_peoes(c)  # coleta as peoes do BD
+    tabuleiro = _coletar_tabuleiro(c)  # coleta as peoes no tabuleiro do BD
 
     jogo = ET.Element('jogo')  # topo do xml
     jogo.append(ET.Comment("Dados de uma partida de ludo"))
 
-    elementos_pecas = ET.SubElement(jogo, 'pecas')  # guardando as pecas
-    for p in pecas:
-        elemento_peca = ET.SubElement(elementos_pecas, 'peca')
+    elementos_peoes = ET.SubElement(jogo, 'peoes')  # guardando as peoes
+    for p in peoes:
+        elemento_peao = ET.SubElement(elementos_peoes, 'peao')
         for d in p:
-            elemento_dado = ET.SubElement(elemento_peca, d)  # chave do dicionario
+            elemento_dado = ET.SubElement(elemento_peao, d)  # chave do dicionario
             elemento_dado.text = str(p[d])  # conteudo do dicionario
             elemento_dado.set('tipo', str(type(p[d]).__name__))  # armazena o tipo da variavel para converter dps
 
@@ -125,24 +125,24 @@ def recupera_partida_completa(c):
     except FileNotFoundError:
         return None
 
-    lista_pecas = []
+    lista_peoes = []
     lista_tabuleiro = []
 
-    # LENDO AS PECAS
-    pecas = jogo.find('pecas')
-    for peca in pecas.findall('peca'):
+    # LENDO AS peoes
+    peoes = jogo.find('peoes')
+    for peao in peoes.findall('peao'):
         d = dict()
-        for atr in peca:
+        for atr in peao:
             # print(atr.tag, atr.attrib['tipo'], atr.text)
             # tag = nome do atributo
             # text = conteudo do atributo
             # attrib['tipo'] = tipo do atributo para converter
             d[atr.tag] = _converte_objeto(atr.text, atr.attrib['tipo'])
-        lista_pecas.append(d)
+        lista_peoes.append(d)
 
     # ESCREVENDO NA BASE DE DADOS
-    for peca in lista_pecas:
-        baseDados.adicionar_peao(c, peca['id'], peca['cor'])
+    for peao in lista_peoes:
+        baseDados.adicionar_peao(c, peao['id'], peao['cor'])
 
     # LENDO OS TABULEIROS
     tabuleiros = jogo.find('tabuleiros')
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
         salvar_partida_completa(conexao, dados=algum_dado)
 
-        # print(coletar_pecas(x))
+        # print(coletar_peoes(x))
     except Exception as e:
         print(e)
     finally:

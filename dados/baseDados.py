@@ -4,7 +4,7 @@ from os import path, sep  # so para as credenciais funcionarem
 
 
 _BD = "ludomodular"
-TABELA_PECAS = 'pecas'
+TABELA_PEOES = 'peoes'
 TABELA_TABULEIRO = 'tabuleiro'
 
 
@@ -97,13 +97,13 @@ def iniciar_tabelas(c):
     cursor = c.cursor()
 
     # excluindo todas as tabelas antigas
-    for t in [TABELA_PECAS, TABELA_TABULEIRO]:
+    for t in [TABELA_PEOES, TABELA_TABULEIRO]:
         q = "DROP TABLE IF EXISTS %s" % t
         cursor.execute(q)
     c.commit()
 
     # criando a tabela para os peoes
-    q = "CREATE TABLE %s (id INTEGER, cor VARCHAR(30), primary key (id))" % TABELA_PECAS
+    q = "CREATE TABLE %s (id INTEGER, cor VARCHAR(30), primary key (id))" % TABELA_PEOES
     cursor.execute(q)
     print("Tabela de peoes criada")
 
@@ -168,24 +168,24 @@ def fechar_conexao(c):
     return
 
 
-def adicionar_peao(c, id_peca, cor_peca):
+def adicionar_peao(c, id_peao, cor_peao):
     """Adiciona o peao e sua cor na tabela."""
     cursor = c.cursor()
-    q = "INSERT INTO %s " % TABELA_PECAS + " (id, cor) VALUES (%s, %s)"
-    val = (id_peca, cor_peca)
+    q = "INSERT INTO %s " % TABELA_PEOES + " (id, cor) VALUES (%s, %s)"
+    val = (id_peao, cor_peao)
     cursor.execute(q, val)
     c.commit()
     cursor.close()
     return
 
 
-def selecionar_peca(c, peca):
+def selecionar_peao(c, peao):
     """
     Procura a cor daquele peca.
     Retorna a cor se achar, ou '' se nao achar.
     """
     cursor = c.cursor()
-    q = "SELECT cor FROM %s WHERE id=%d" % (TABELA_PECAS, peca)
+    q = "SELECT cor FROM %s WHERE id=%d" % (TABELA_PEOES, peao)
     cursor.execute(q)
     r = cursor.fetchone()
 
@@ -196,22 +196,22 @@ def selecionar_peca(c, peca):
 
 
 def limpar_peao(c):
-    """Limpa a tabela com as pecas."""
+    """Limpa a tabela com os peoes."""
     cursor = c.cursor()
-    q = "DELETE FROM %s" % TABELA_PECAS
+    q = "DELETE FROM %s" % TABELA_PEOES
     cursor.execute(q)
     c.commit()
     cursor.close()
     return
 
 
-def adicionar_tabuleiro(c, peca, pos, pos_inicial, eh_inicio, eh_finalizado):
+def adicionar_tabuleiro(c, peao, pos, pos_inicial, eh_inicio, eh_finalizado):
     """Adiciona o peao e suas informacoes na tabela do tabuleiro."""
     cursor = c.cursor()
     q = "INSERT INTO %s " % TABELA_TABULEIRO +\
         "(id, pos, pos_inicial, eh_inicio, eh_finalizado) VALUES (%s, %s, %s, %s, %s)"
 
-    val = (peca, pos, pos_inicial, 1 if eh_inicio else 0, 1 if eh_finalizado else 0)
+    val = (peao, pos, pos_inicial, 1 if eh_inicio else 0, 1 if eh_finalizado else 0)
     cursor.execute(q, val)
     c.commit()
     cursor.close()
@@ -231,11 +231,11 @@ def _converter_tupla_dic(tupla):
     return d
 
 
-def selecionar_tabuleiro(c, peca=None, pos=None):
+def selecionar_tabuleiro(c, peao=None, pos=None):
     """Retorna um dicionario com os dados do peao no tabuleiro, ou -1 se nao existir aquele peao/pos."""
     cursor = c.cursor()
-    if peca is not None:
-        q = "SELECT * FROM %s WHERE id=%d" % (TABELA_TABULEIRO, peca)
+    if peao is not None:
+        q = "SELECT * FROM %s WHERE id=%d" % (TABELA_TABULEIRO, peao)
         cursor.execute(q)
         r = cursor.fetchone()
         cursor.close()
@@ -255,16 +255,16 @@ def selecionar_tabuleiro(c, peca=None, pos=None):
     return r
 
 
-def modificar_tabuleiro(c, peca, pos, pos_inicial, eh_finalizado, eh_inicio):
+def modificar_tabuleiro(c, peao, pos, pos_inicial, eh_finalizado, eh_inicio):
     """Atualiza a peca com essas informacoes."""
     cursor = c.cursor()
 
     # remove peca do tabuleiro
-    q = "DELETE FROM %s WHERE id=%d" % (TABELA_TABULEIRO, peca)
+    q = "DELETE FROM %s WHERE id=%d" % (TABELA_TABULEIRO, peao)
     cursor.execute(q)
 
     # adiciona ela novamente
-    adicionar_tabuleiro(c, peca, pos, pos_inicial, eh_finalizado, eh_inicio)
+    adicionar_tabuleiro(c, peao, pos, pos_inicial, eh_finalizado, eh_inicio)
 
     cursor.close()
     return

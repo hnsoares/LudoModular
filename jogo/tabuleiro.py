@@ -47,7 +47,7 @@ def _achar_peao(c, id_peao):
     #     if p['id'] == id_peao:
     #         return i
 
-    return baseDados.selecionar_tabuleiro(c, peca=id_peao)
+    return baseDados.selecionar_tabuleiro(c, peao=id_peao)
 
 
 def _definir_posicoes_iniciais(n, m=N_PEOES):
@@ -166,7 +166,7 @@ def reiniciar_peao(c, id_peao):
     # if i == -1:
     #    return -1
 
-    p = baseDados.selecionar_tabuleiro(c, peca=id_peao)
+    p = baseDados.selecionar_tabuleiro(c, peao=id_peao)
     if p == -1:
         return -1
 
@@ -192,7 +192,7 @@ def movimentacao_possivel(c, id_peao, mov):
     #    return -1
     # p = tabela_peoes[i]
 
-    p = baseDados.selecionar_tabuleiro(c, peca=id_peao)
+    p = baseDados.selecionar_tabuleiro(c, peao=id_peao)
     if p == -1:
         return -1
 
@@ -229,7 +229,7 @@ def mover_peao(c, id_peao, mov):
     #     return -1
     # p = tabela_peoes[i]
 
-    p = baseDados.selecionar_tabuleiro(c, peca=id_peao)
+    p = baseDados.selecionar_tabuleiro(c, peao=id_peao)
     if p == -1:
         return -1
 
