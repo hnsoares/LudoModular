@@ -44,7 +44,7 @@ def criar_partida():
     """
     global conexao_bd
 
-    conexao_bd = baseDados.inicar_conexao()
+    conexao_bd = baseDados.iniciar_conexao()
     peao.limpar_peoes(conexao_bd)
     peoes_cor.clear()
     tabuleiro.iniciar_tabuleiro(conexao_bd, len(LISTA_CORES))  # 4 cores

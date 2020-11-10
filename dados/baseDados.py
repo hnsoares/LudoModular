@@ -126,7 +126,7 @@ def iniciar_tabelas(c):
     return
 
 
-def inicar_conexao():
+def iniciar_conexao():
     """Estabelece uma conexao com o banco de dados."""
     c = _conectar_mysql_jogo()  # conecta diretamente ao BD do jogo
     if c is None:  # erro de leitura de arquivo
@@ -198,7 +198,8 @@ def selecionar_peao(c, peao):
 def limpar_peao(c):
     """Limpa a tabela com os peoes."""
     cursor = c.cursor()
-    q = "DELETE FROM %s" % TABELA_PEOES
+    # q = "DELETE FROM %s" % TABELA_PEOES
+    q = "TRUNCATE TABLE %s" % TABELA_PEOES
     cursor.execute(q)
     c.commit()
     cursor.close()
@@ -273,7 +274,8 @@ def modificar_tabuleiro(c, peao, pos, pos_inicial, eh_finalizado, eh_inicio):
 def limpar_tabuleiro(c):
     """Limpa a tabela com as pecas no tabuleiro."""
     cursor = c.cursor()
-    q = "DELETE FROM %s" % TABELA_TABULEIRO
+    # q = "DELETE FROM %s" % TABELA_TABULEIRO
+    q = "TRUNCATE TABLE %s" % TABELA_TABULEIRO
     cursor.execute(q)
     c.commit()
     cursor.close()

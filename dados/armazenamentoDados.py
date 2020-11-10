@@ -177,7 +177,7 @@ def recupera_partida_completa(c):
 
 
 if __name__ == "__main__":
-    conexao = baseDados.inicar_conexao()
+    conexao = baseDados.iniciar_conexao()
     try:
         baseDados.adicionar_peao(conexao, 0, 'vermelho')
         baseDados.adicionar_peao(conexao, 1, 'rosa')
