@@ -175,7 +175,7 @@ def reiniciar_peao(c, id_peao):
     p['eh_finalizado'] = False
     p['eh_inicio'] = True
 
-    baseDados.modificar_tabuleiro(c, id_peao, p['pos'], p['pos_inicial'], p['eh_finalizado'], p['eh_inicio'])
+    baseDados.modificar_tabuleiro(c, id_peao, p['pos'], p['pos_inicial'], p['eh_inicio'], p['eh_finalizado'])
     return 0
 
 

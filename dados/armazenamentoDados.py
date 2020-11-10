@@ -144,10 +144,12 @@ def recupera_partida_completa(c):
         lista_peoes.append(d)
 
     # ESCREVENDO NA BASE DE DADOS
+    baseDados.limpar_peao(c)
     for peao in lista_peoes:
         baseDados.adicionar_peao(c, peao['id'], peao['cor'])
 
     # LENDO OS TABULEIROS
+    baseDados.limpar_tabuleiro(c)
     tabuleiros = jogo.find('tabuleiros')
     for tabuleiro in tabuleiros.findall('tabuleiro'):
         d = dict()

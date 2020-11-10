@@ -37,14 +37,14 @@ def escolher_peao(lista):
     return int(x)
 
 
-def criar_partida():
+def criar_partida(limpar=True):
     """
     Inicializa a partida, criando os peoes e jogadores.
     Retorna 0.
     """
     global conexao_bd
 
-    conexao_bd = baseDados.iniciar_conexao()
+    conexao_bd = baseDados.iniciar_conexao(limpar)
     peao.limpar_peoes(conexao_bd)
     peoes_cor.clear()
     tabuleiro.iniciar_tabuleiro(conexao_bd, len(LISTA_CORES))  # 4 cores
@@ -156,9 +156,9 @@ def rodar_partida():
             print("Voce nao pode jogar nesta rodada.\n")
         else:
             print("Jogada realizada com sucesso. \n")
-            temp = input("Deseja salvar a partida? (y/n): ")
-            if temp == 'y':
-                armazenamentoDados.salvar_partida_completa(conexao_bd)
+            # temp = input("Deseja salvar a partida? (y/n): ")
+            # if temp == 'y':
+            #    armazenamentoDados.salvar_partida_completa(conexao_bd)
 
     print("%s ganhou" % cor)
     return 0
