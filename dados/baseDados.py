@@ -105,7 +105,7 @@ def _iniciar_tabelas(c):
     # criando a tabela para os peoes
     q = "CREATE TABLE IF NOT EXISTS %s (id INTEGER, cor VARCHAR(30), primary key (id))" % TABELA_PEOES
     cursor.execute(q)
-    # print("Tabela de peoes criada")
+    print("Tabela de peoes criada")
 
     # criando a tabela para o tabuleiro
     q = """

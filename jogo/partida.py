@@ -12,19 +12,16 @@ mover_peao()
 16/10 (Daniel): Jogar novamente
 """
 
-
 from jogo import dado
 from jogo import peao
 from jogo import tabuleiro
 from dados import baseDados
 from dados import armazenamentoDados
-# from unittest.mock import Mock
+import datetime
 
 LISTA_CORES = ['yellow', 'green', 'red', 'blue']
 peoes_cor = dict()
 conexao_bd = None  # conexao com BD a ser feita
-
-# escolher_peao = Mock(return_value=0)
 
 
 def escolher_peao(lista):
@@ -128,42 +125,57 @@ def rodada(cor):
     return 0
 
 
-def cor_da_rodada():
-    i = 0
-    while True:
-        yield LISTA_CORES[i]
-        i += 1
-        if i == len(LISTA_CORES):
-            i = 0
-
-
-def rodar_partida():
+def rodar_partida(recuperar=False):
     """Cria e joga uma partida. Retorna 0 ao seu final."""
-
-    print("Criando a partida.")
     criar_partida()
+    if not recuperar:
+        print("Criando a partida.")
+        cores = LISTA_CORES.copy()
+        # [proxima_cor, segunda_cor,...]
+        dados = {'hora_criacao': datetime.datetime.now().isoformat(),
+                 'tempo': 0,
+                 'cores': cores}
+        hora_inicial = datetime.datetime.now()
+        tempo_inicial = 0
 
-    print("Comecando a partida. ")
-    g = cor_da_rodada()
-    x = -1
-    cor = ''
-    while x != 2:
-        if x != 3:  # 3 eh quando a pessoa pode jogar de novo
-            cor = next(g)
+    else:
+        print("Recuperando partida.")
+        dados = armazenamentoDados.recupera_partida_completa(conexao_bd)
+        if dados is None:
+            print("Nenhuma partida para recuperar")
+            return -1
+        cores = dados['cores']
+        minutos, segundos = dados['tempo'].split(':')
+        tempo_inicial = int(minutos) * 60 + int(segundos)
+        hora_inicial = datetime.datetime.now()
+
+    while cores:
+        cor = cores.pop(0)
         print("Vez do %s" % cor)
         x = rodada(cor)
+        if x == 2:
+            print("Voce ganhou!")
+            continue
         if x == 1:
-            print("Voce nao pode jogar nesta rodada.\n")
-        else:
-            print("Jogada realizada com sucesso. \n")
-            # temp = input("Deseja salvar a partida? (y/n): ")
-            # if temp == 'y':
-            #    armazenamentoDados.salvar_partida_completa(conexao_bd)
+            print("Voce nao pode realizar nenhum movimento.")
 
-    print("%s ganhou" % cor)
-    return 0
+        print("Rodada finalizada.\n")
+        if x == 3:
+            cores.insert(0, cor)
+        else:
+            cores.append(cor)
+
+        tempo_decorrido = (datetime.datetime.now() - hora_inicial).total_seconds() + tempo_inicial
+        dados['tempo'] = "%d:%d" % (tempo_decorrido // 60, tempo_decorrido % 60)
+
+        armazenamentoDados.salvar_partida_completa(conexao_bd, dados)
 
 
 if __name__ == '__main__':
-    rodar_partida()
+    aaa = input("Digite ENTER para comecar uma partida, ou qualquer outra tecla para continuar uma passada.")
+    if aaa == '':
+        rodar_partida()
+    else:
+        rodar_partida(True)
+
     baseDados.fechar_conexao(conexao_bd)
