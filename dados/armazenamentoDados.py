@@ -87,7 +87,16 @@ def salvar_partida_completa(c, dados=None):
     if dados is not None:
         elemento_dados = ET.SubElement(jogo, 'dados')
         for d in dados:
-            if type(dados[d]) not in [str, int, float]:
+            if type(dados[d]) == list:
+                elemento_dado = ET.SubElement(elemento_dados, d)
+                elemento_dado.text = ','.join([str(x) for x in dados[d]])
+                elemento_dado.set('tipo', 'list')
+                if not dados[d]:
+                    elemento_dado.set('subtipo', 'str')
+                else:
+                    elemento_dado.set('subtipo', str(type(dados[d][0]).__name__))
+
+            elif type(dados[d]) not in [str, int, float]:
                 print("Nao consegui armazenar o dado:", d, dados[d])
             else:
                 elemento_dado = ET.SubElement(elemento_dados, d)
@@ -176,7 +185,10 @@ def recupera_partida_completa(c):
     dicionario_dados = dict()
     for dado in dados:
         # print(dado.tag, dado.attrib['tipo'], dado.text)
-        dicionario_dados[dado.tag] = _converte_objeto(dado.text, dado.attrib['tipo'])
+        if dado.attrib['tipo'] == 'list':
+            dicionario_dados[dado.tag] = [_converte_objeto(x, dado.attrib['subtipo']) for x in dado.text.split(",")]
+        else:
+            dicionario_dados[dado.tag] = _converte_objeto(dado.text, dado.attrib['tipo'])
 
     return dicionario_dados
 
