@@ -57,6 +57,7 @@ def salvar_partida_completa(c, dados=None):
     """
     Salva os dados da partida em um arquivo para ser recuperado depois.
     dados eh um dicionario com informacoes genericas. Deve ser chave -> int/float/string
+    Retorna 0
     """
 
     peoes = _coletar_peoes(c)  # coleta as peoes do BD
@@ -96,6 +97,8 @@ def salvar_partida_completa(c, dados=None):
     saida = _formata_xml(jogo)  # copia dos slides 15
     with open(PATH + ARQUIVO_PARTIDA, "w+") as f:
         f.write(saida)
+
+    return 0
 
 
 def exclui_partida_completa():

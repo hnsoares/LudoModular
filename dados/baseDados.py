@@ -91,7 +91,7 @@ def _criar_bd_jogo(c):
     return 1
 
 
-def iniciar_tabelas(c):
+def _iniciar_tabelas(c):
     """Cria as tabelas no Banco de Dados."""
 
     cursor = c.cursor()
@@ -148,7 +148,7 @@ def iniciar_conexao():
 
     print("Conectado ao MySQL " + c.get_server_info())
 
-    iniciar_tabelas(c)
+    _iniciar_tabelas(c)
 
     return c
 
@@ -169,14 +169,14 @@ def fechar_conexao(c):
 
 
 def adicionar_peao(c, id_peao, cor_peao):
-    """Adiciona o peao e sua cor na tabela."""
+    """Adiciona o peao e sua cor na tabela. Retorna 0"""
     cursor = c.cursor()
     q = "INSERT INTO %s " % TABELA_PEOES + " (id, cor) VALUES (%s, %s)"
     val = (id_peao, cor_peao)
     cursor.execute(q, val)
     c.commit()
     cursor.close()
-    return
+    return 0
 
 
 def selecionar_peao(c, peao):
@@ -196,18 +196,18 @@ def selecionar_peao(c, peao):
 
 
 def limpar_peao(c):
-    """Limpa a tabela com os peoes."""
+    """Limpa a tabela com os peoes. Retorna 0"""
     cursor = c.cursor()
     # q = "DELETE FROM %s" % TABELA_PEOES
     q = "TRUNCATE TABLE %s" % TABELA_PEOES
     cursor.execute(q)
     c.commit()
     cursor.close()
-    return
+    return 0
 
 
 def adicionar_tabuleiro(c, peao, pos, pos_inicial, eh_inicio, eh_finalizado):
-    """Adiciona o peao e suas informacoes na tabela do tabuleiro."""
+    """Adiciona o peao e suas informacoes na tabela do tabuleiro. Retorna 0"""
     cursor = c.cursor()
     q = "INSERT INTO %s " % TABELA_TABULEIRO +\
         "(id, pos, pos_inicial, eh_inicio, eh_finalizado) VALUES (%s, %s, %s, %s, %s)"
@@ -216,7 +216,7 @@ def adicionar_tabuleiro(c, peao, pos, pos_inicial, eh_inicio, eh_finalizado):
     cursor.execute(q, val)
     c.commit()
     cursor.close()
-    return
+    return 0
 
 
 def _converter_tupla_dic(tupla):
@@ -257,7 +257,7 @@ def selecionar_tabuleiro(c, peao=None, pos=None):
 
 
 def modificar_tabuleiro(c, peao, pos, pos_inicial, eh_finalizado, eh_inicio):
-    """Atualiza a peca com essas informacoes."""
+    """Atualiza a peca com essas informacoes. Retorna 0"""
     cursor = c.cursor()
 
     # remove peca do tabuleiro
@@ -268,18 +268,18 @@ def modificar_tabuleiro(c, peao, pos, pos_inicial, eh_finalizado, eh_inicio):
     adicionar_tabuleiro(c, peao, pos, pos_inicial, eh_finalizado, eh_inicio)
 
     cursor.close()
-    return
+    return 0
 
 
 def limpar_tabuleiro(c):
-    """Limpa a tabela com as pecas no tabuleiro."""
+    """Limpa a tabela com as pecas no tabuleiro. Retorna 0"""
     cursor = c.cursor()
     # q = "DELETE FROM %s" % TABELA_TABULEIRO
     q = "TRUNCATE TABLE %s" % TABELA_TABULEIRO
     cursor.execute(q)
     c.commit()
     cursor.close()
-    return
+    return 0
 
 
 if __name__ == '__main__':
