@@ -1,9 +1,35 @@
+"""
+Módulo para base de dados.
+Sua função é gerir a base, e servir para acessar e modificar dados.
+
+Caso a conexão não funcione, confira se o arquivo credenciais.txt está configurada corretamente.
+Mais informações no arquivo README.MD
+
+Funções:
+    iniciar_conexao()
+    fechar_conexao(c)
+
+    limpar_peao(c)
+    limpar_tabuleiro(c)
+
+    adicionar_peao(c, cor)
+    adicionar_tabuleiro(c, id, pos, pos_inicial, eh_inicio, eh_finalizado)
+
+    selecionar_peao(c, [peao], [cor])
+    selecionar_tabuleiro(c, [peao], [pos])
+
+    modificar_tabuleiro(c, id, pos, pos_inicial, eh inicio, eh finalizado)
+
+Feita por Daniel
+"""
+
+
 import mysql.connector
 from mysql.connector import Error
 from os import path, sep  # so para as credenciais funcionarem
 
 
-_BD = "ludomodular"
+_BD = "ludomodular"  # nome do banco de dados
 TABELA_PEOES = 'peoes'
 TABELA_TABULEIRO = 'tabuleiro'
 
@@ -16,7 +42,7 @@ def _pegar_credenciais():
     'user'
     password'
     """
-    p = path.dirname(path.abspath(__file__)) + sep + 'arquivos' + sep
+    p = path.dirname(path.abspath(__file__)) + sep + 'arquivos' + sep  # cria o path para o arquivo
 
     try:
         with open(p + 'credenciais.txt', 'r') as f:
@@ -29,7 +55,7 @@ def _pegar_credenciais():
 def _conectar_mysql_jogo():
     """
     Conecta com a base de dados do jogo a ser usado.
-    Retorna 0 se sucesso.
+    Retorna o conector se sucesso.
     Retorna Error se nao conseguiu
     """
     credenciais = _pegar_credenciais()
@@ -40,7 +66,7 @@ def _conectar_mysql_jogo():
             host=credenciais[0],
             user=credenciais[1],
             password=credenciais[2],
-            database=_BD
+            database=_BD  # mesma coisa que a funcao abaixo, mas com o BD
         )
         return c
     except Error as e:
@@ -51,7 +77,7 @@ def _conectar_mysql():
     """
     Pega as credenciais e conecta com o BD.
     Retorna o objeto do conector se sucesso,
-    retorna Error se falhou.
+    Retorna Error se falhou.
     """
 
     credenciais = _pegar_credenciais()
@@ -105,7 +131,7 @@ def _iniciar_tabelas(c):
     # criando a tabela para os peoes
     q = "CREATE TABLE IF NOT EXISTS %s (id INTEGER, cor VARCHAR(30), primary key (id))" % TABELA_PEOES
     cursor.execute(q)
-    print("Tabela de peoes criada")
+    # print("Tabela de peoes criada")
 
     # criando a tabela para o tabuleiro
     q = """
@@ -119,15 +145,18 @@ def _iniciar_tabelas(c):
     """ % TABELA_TABULEIRO
 
     cursor.execute(q)
-    print("Tabela de tabuleiro criada")
+    # print("Tabela de tabuleiro criada")
 
     c.commit()
     cursor.close()
     return
 
 
-def iniciar_conexao(limpar=True):
-    """Estabelece uma conexao com o banco de dados."""
+def iniciar_conexao():
+    """
+    Estabelece uma conexao com o banco de dados.
+    Retorna o objeto, ou None se deu erro.
+    """
     c = _conectar_mysql_jogo()  # conecta diretamente ao BD do jogo
     if c is None:  # erro de leitura de arquivo
         return None
@@ -156,7 +185,10 @@ def iniciar_conexao(limpar=True):
 
 
 def fechar_conexao(c):
-    """Encerra a conexao com o MySQL."""
+    """
+    Encerra a conexao com o MySQL.
+    Nao retorna nada.
+    """
 
     if c.is_connected():
         cursor = c.cursor()
@@ -171,14 +203,18 @@ def fechar_conexao(c):
 
 
 def adicionar_peao(c, id_peao, cor_peao):
-    """Adiciona o peao e sua cor na tabela. Retorna 0 ou -1 se ja havia"""
+    """
+    Adiciona o peao e sua cor na tabela.
+    Retorna 0 ou -1 se ja havia.
+    """
+
     cursor = c.cursor()
     q = "INSERT INTO %s " % TABELA_PEOES + " (id, cor) VALUES (%s, %s)"
     val = (id_peao, cor_peao)
     try:
         cursor.execute(q, val)
         c.commit()
-    except mysql.connector.IntegrityError:
+    except mysql.connector.IntegrityError:  # ja havia um peao com aquele id
         return -1
     cursor.close()
     return 0
@@ -186,8 +222,12 @@ def adicionar_peao(c, id_peao, cor_peao):
 
 def selecionar_peao(c, peao=None, cor=None):
     """
-    Procura a cor/id daquele peca/cor.
-    Retorna a cor se achar, ou '' se nao achar, ou None se nao tiver aquela cor
+    Retorna informacao dos peoes no tabuleiro.
+    Se peao for um id:
+        Retorna cor do peao se achar o id.
+        Retorna '' se nao tiver peao com aquele id
+    Se nao, se uma cor for definida:
+        Retorna uma lista com os ids dos peoes daquela cor
     """
 
     cursor = c.cursor()
@@ -195,11 +235,10 @@ def selecionar_peao(c, peao=None, cor=None):
         q = "SELECT cor FROM %s WHERE id=%d" % (TABELA_PEOES, peao)
         cursor.execute(q)
         r = cursor.fetchone()
-
         cursor.close()
         if r is None:
             return ''
-        return r[0]
+        return r[0]  # (cor,) -> precisa levar so a cor
 
     if cor is not None:
         q = "SELECT id FROM %s WHERE cor='%s'" % (TABELA_PEOES, cor)
@@ -208,12 +247,15 @@ def selecionar_peao(c, peao=None, cor=None):
         cursor.close()
         if r is None:
             return None
-        r = [x[0] for x in r]
+        r = [x[0] for x in r]  # pega o primeiro valor da tupla (id) de cada resposta
         return r
 
 
 def limpar_peao(c):
-    """Limpa a tabela com os peoes. Retorna 0"""
+    """
+    Limpa a tabela com os peoes.
+    Retorna 0
+    """
     cursor = c.cursor()
     q = "DELETE FROM %s" % TABELA_PEOES
     # q = "TRUNCATE TABLE %s" % TABELA_PEOES
@@ -224,7 +266,11 @@ def limpar_peao(c):
 
 
 def adicionar_tabuleiro(c, peao, pos, pos_inicial, eh_inicio, eh_finalizado):
-    """Adiciona o peao e suas informacoes na tabela do tabuleiro. Retorna 0 ou -1 se ja havia"""
+    """
+    Adiciona o peao e suas informacoes na tabela do tabuleiro.
+    Retorna 0 no sucesso.
+    Retorna -1 se ja havia um peao com aquele id.
+    """
     cursor = c.cursor()
     q = "INSERT INTO %s " % TABELA_TABULEIRO +\
         "(id, pos, pos_inicial, eh_inicio, eh_finalizado) VALUES (%s, %s, %s, %s, %s)"
@@ -233,27 +279,33 @@ def adicionar_tabuleiro(c, peao, pos, pos_inicial, eh_inicio, eh_finalizado):
     try:
         cursor.execute(q, val)
         c.commit()
-    except mysql.connector.IntegrityError:
+    except mysql.connector.IntegrityError:  # ja havia um peao com aquele id
         return -1
     cursor.close()
     return 0
 
 
 def _converter_tupla_dic(tupla):
-    """Converte a tupla de um elemento do tabuleiro em um dicionario."""
+    """
+    Converte a tupla de um elemento do tabuleiro em um dicionario.
+    Pode ser substituido por c.cursor(dictionary=True).
+    """
     # (id, pos, pos_inicial, eh_inicio, eh_finalizado)
     d = dict()
     d['id'] = tupla[0]
     d['pos'] = tupla[1]
     d['pos_inicial'] = tupla[2]
-    d['eh_inicio'] = True if tupla[3] == 1 else False
-    d['eh_finalizado'] = True if tupla[4] == 1 else False
+    d['eh_inicio'] = True if tupla[3] == 1 else False  # converte int para bool
+    d['eh_finalizado'] = True if tupla[4] == 1 else False  # converte int para bool
 
     return d
 
 
 def selecionar_tabuleiro(c, peao=None, pos=None):
-    """Retorna um dicionario com os dados do peao no tabuleiro, ou -1 se nao existir aquele peao/pos."""
+    """
+    Retorna um dicionario com os dados do peao no tabuleiro
+    Retorna -1 se nao existir aquele peao/pos.
+    """
     # cursor = c.cursor(dictionary=True)
     cursor = c.cursor()
     if peao is not None:
@@ -266,20 +318,25 @@ def selecionar_tabuleiro(c, peao=None, pos=None):
             return -1
         return _converter_tupla_dic(r)
 
-    # vendo pela posicao
-    q = "SELECT * FROM %s WHERE pos=%d" % (TABELA_TABULEIRO, pos)
-    cursor.execute(q)
-    r = cursor.fetchall()
-    cursor.close()
-    for i in range(len(r)):
-        r[i] = _converter_tupla_dic(r[i])
-
-    return r
+    if pos is not None:
+        # vendo pela posicao
+        q = "SELECT * FROM %s WHERE pos=%d" % (TABELA_TABULEIRO, pos)
+        cursor.execute(q)
+        r = cursor.fetchall()
+        cursor.close()
+        for i in range(len(r)):
+            r[i] = _converter_tupla_dic(r[i])
+        return r
 
 
 def modificar_tabuleiro(c, peao, pos, pos_inicial, eh_finalizado, eh_inicio):
-    """Atualiza a peca com essas informacoes. Retorna 0"""
+    """
+    Atualiza a peca com essas informacoes
+    Retorna 0
+    """
     cursor = c.cursor()
+    # a estrategia eh remover e adicionar.
+    # pode ser trocado pelo UPDATE futuramente
 
     # remove peca do tabuleiro
     q = "DELETE FROM %s WHERE id=%d" % (TABELA_TABULEIRO, peao)
@@ -293,7 +350,10 @@ def modificar_tabuleiro(c, peao, pos, pos_inicial, eh_finalizado, eh_inicio):
 
 
 def limpar_tabuleiro(c):
-    """Limpa a tabela com as pecas no tabuleiro. Retorna 0"""
+    """
+    Limpa a tabela com as pecas no tabuleiro.
+    Retorna 0
+    """
     cursor = c.cursor()
     q = "DELETE FROM %s" % TABELA_TABULEIRO
     # q = "TRUNCATE TABLE %s" % TABELA_TABULEIRO
@@ -301,7 +361,3 @@ def limpar_tabuleiro(c):
     c.commit()
     cursor.close()
     return 0
-
-
-if __name__ == '__main__':
-    pass

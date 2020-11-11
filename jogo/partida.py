@@ -1,15 +1,7 @@
 """
 Modulo Partida
-iniciar_tabuleiro()
-adicionar_peoes()
-acessar_posicao()
-reiniciar_peao()
-movimentacao_possivel()
-mover_peao()
 
-28/09 (Guilherme): Modulo criado
-05/10 (Daniel): Recomecando (reescrevendo tudo)
-16/10 (Daniel): Jogar novamente
+Feito por Daniel
 """
 
 from jogo import dado
@@ -20,20 +12,9 @@ from dados import armazenamentoDados
 import datetime
 from display import jogo
 
-LISTA_CORES = ['yellow', 'green', 'red', 'blue']
 peoes_cor = dict()
 conexao_bd = None  # conexao com BD a ser feita
 peoes_atualizar_grafico = []
-
-
-def escolher_peao(lista):
-    print("Escolha o peão: ")
-    for i, a in enumerate(lista):
-        print('(digite %d): id %d' % (i, a))
-    x = input('Sua escolha: ')
-    while not (x.isdigit() and (0 <= int(x) < len(lista))):
-        x = input("Sua escolha: ")
-    return int(x)
 
 
 def criar_partida(cores):
@@ -190,25 +171,23 @@ def rodar_partida(dados):
     return 0
 
 
-if __name__ == '__main__':
-    aaa = input("Digite um numero de jogadores para começar uma partida, ou ENTER para carregar: ")
-    if aaa == '':
-        d = carrega_partida()
-        data_criacao = d['hora_criacao']
-        tempo_jogado = d['tempo']
+def inicia_partida(lista_cores):
+    """
+    Inicia uma partida.
+    Recebe as cores da partida e a cria.
+    Se for uma lista vazia, recupera uma partida antiga.
+    """
+    global conexao_bd
+    conexao_bd = baseDados.iniciar_conexao()
+    if not lista_cores:
+        dados = carrega_partida()
+        data_criacao = dados['hora_criacao']
+        tempo_jogado = dados['tempo']
         print("Carregando a partida criada em %s, jogada por %s" % (data_criacao, tempo_jogado))
 
-    else:
-        q = int(aaa)
-        if not 2 <= q <= 4:
-            print("Quantidade invalida. Somente entre 2 a 4. Abortando...")
-            exit(0)
-        # c = [input("Digite uma cor: ") for i in range(q)]
-        c = LISTA_CORES[:q]
-        # print(c)
-        d = criar_partida(c)
+    dados = criar_partida(lista_cores)
 
     jogo.inicializar(conexao_bd)
-    rodar_partida(d)
-
+    rodar_partida(dados)
     baseDados.fechar_conexao(conexao_bd)
+    return

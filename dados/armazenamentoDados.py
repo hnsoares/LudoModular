@@ -1,10 +1,16 @@
 """
 Módulo para armazenamento permanente de Dados.
 A sua função é guardar os arquivos da base de dados e armazenar em arquivos XML.
+
+Funcoes:
+    exclui_partida_completa()
+    recupera_partida_completa(c)
+    salva_partida_completa(c, [dados])
+
+Feita por Daniel
 """
 
 from dados import baseDados
-# import mysql.connector
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from os import path, sep, remove  # so para o armazenamento funcionar e para remover uma partida salva
@@ -56,7 +62,12 @@ def _formata_xml(xml):
 def salvar_partida_completa(c, dados=None):
     """
     Salva os dados da partida em um arquivo para ser recuperado depois.
-    dados eh um dicionario com informacoes genericas. Deve ser chave -> int/float/string
+    Os dados seguem as seguintes restricoes:
+        Devem ser um dicionario com as chaves todas como string
+        Ele aceita valores de conteudo como int, float ou string
+        Ele aceita que o valor seja uma lista, porem:
+            Todos os elementos devem ser do mesmo tipo.
+            Os elementos seguem as mesmas regras acima (int, float, string)
     Retorna 0
     """
 
@@ -65,6 +76,10 @@ def salvar_partida_completa(c, dados=None):
 
     jogo = ET.Element('jogo')  # topo do xml
     jogo.append(ET.Comment("Dados de uma partida de ludo"))
+
+    # para peoes e tabuleiros, preciso criar um elemento
+    # depois, criar um elemento para cada objeto, e com seus dados,
+    # criar um elemento para cada dado, setando o seu tipo e seu conteudo
 
     elementos_peoes = ET.SubElement(jogo, 'peoes')  # guardando as peoes
     for p in peoes:
@@ -83,18 +98,22 @@ def salvar_partida_completa(c, dados=None):
             elemento_dado.text = str(t[d])
             elemento_dado.set('tipo', str(type(t[d]).__name__))
 
-    # dados quaisquer. o dicionario precisa ser chave <string> -> <int, float, string> para conseguir converter
+    # para dados, eh mais complicado.
+    # funciona parecido, mas eh mais geral
+    # se o dado for uma lista, preciso converter toda a lista.
+    #   CONSIDERANDO QUE TODOS OS ELEMENTOS DA LISTA SAO DO MESMO TIPO
+
     if dados is not None:
         elemento_dados = ET.SubElement(jogo, 'dados')
         for d in dados:
-            if type(dados[d]) == list:
+            if type(dados[d]) == list:  # se o dado for uma lista
                 elemento_dado = ET.SubElement(elemento_dados, d)
-                elemento_dado.text = ','.join([str(x) for x in dados[d]])
+                elemento_dado.text = ','.join([str(x) for x in dados[d]])  # junta tudo com virgulas
                 elemento_dado.set('tipo', 'list')
                 if not dados[d]:
-                    elemento_dado.set('subtipo', 'str')
+                    elemento_dado.set('subtipo', 'str')   # se a lista estiver vazia, fala que eh string
                 else:
-                    elemento_dado.set('subtipo', str(type(dados[d][0]).__name__))
+                    elemento_dado.set('subtipo', str(type(dados[d][0]).__name__))  # pega o tipo do primeiro
 
             elif type(dados[d]) not in [str, int, float]:
                 print("Nao consegui armazenar o dado:", d, dados[d])
@@ -125,9 +144,11 @@ def exclui_partida_completa():
 
 def recupera_partida_completa(c):
     """
-    Recupera a partida salva e joga no BD. Recupera também os dados extras e retorna o dicionario.
+    Recupera a partida salva e joga no BD.
+    Recupera também os dados extras e retorna o dicionario como fornecido para salvar
     Retorna None se nao tiver nenhuma partida salva.
     """
+
     nome_arquivo = PATH + ARQUIVO_PARTIDA
     try:
         with open(nome_arquivo, 'r') as f:
@@ -172,6 +193,7 @@ def recupera_partida_completa(c):
 
     # ESCREVENDO NA BASE DE DADOS
     for tab in lista_tabuleiro:
+        # pode ser otimizada a usar executemany do SQL
         baseDados.adicionar_tabuleiro(c, tab['id'], tab['pos'], tab['pos_inicial'],
                                       tab['eh_inicio'], tab['eh_finalizado'])
 
@@ -191,23 +213,3 @@ def recupera_partida_completa(c):
             dicionario_dados[dado.tag] = _converte_objeto(dado.text, dado.attrib['tipo'])
 
     return dicionario_dados
-
-
-if __name__ == "__main__":
-    conexao = baseDados.iniciar_conexao()
-    try:
-        baseDados.adicionar_peao(conexao, 0, 'vermelho')
-        baseDados.adicionar_peao(conexao, 1, 'rosa')
-
-        baseDados.adicionar_tabuleiro(conexao, 1, 2, 3, True, False)
-        baseDados.adicionar_tabuleiro(conexao, 4, 5, 6, False, True)
-
-        algum_dado = {'tempo': 100, 'turno': 'vermelho'}
-
-        salvar_partida_completa(conexao, dados=algum_dado)
-
-        # print(coletar_peoes(x))
-    except Exception as e:
-        print(e)
-    finally:
-        baseDados.fechar_conexao(conexao)
