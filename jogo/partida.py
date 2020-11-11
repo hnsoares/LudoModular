@@ -12,16 +12,16 @@ mover_peao()
 16/10 (Daniel): Jogar novamente
 """
 
-
 from jogo import dado
 from jogo import peao
 from jogo import tabuleiro
-# from unittest.mock import Mock
+from dados import baseDados
+from dados import armazenamentoDados
+import datetime
 
 LISTA_CORES = ['yellow', 'green', 'red', 'blue']
 peoes_cor = dict()
-
-# escolher_peao = Mock(return_value=0)
+conexao_bd = None  # conexao com BD a ser feita
 
 
 def escolher_peao(lista):
@@ -34,21 +34,23 @@ def escolher_peao(lista):
     return int(x)
 
 
-def criar_partida():
+def criar_partida(limpar=True):
     """
     Inicializa a partida, criando os peoes e jogadores.
     Retorna 0.
     """
+    global conexao_bd
 
-    peao.limpar_peoes()
+    conexao_bd = baseDados.iniciar_conexao(limpar)
+    peao.limpar_peoes(conexao_bd)
     peoes_cor.clear()
-    tabuleiro.iniciar_tabuleiro(len(LISTA_CORES))  # 4 cores
+    tabuleiro.iniciar_tabuleiro(conexao_bd, len(LISTA_CORES))  # 4 cores
 
     for cor in LISTA_CORES:
         peoes_cor[cor] = list()
         for i in range(4):
-            peoes_cor[cor].append(peao.criar_peao(cor))
-        tabuleiro.adicionar_peoes(peoes_cor[cor])
+            peoes_cor[cor].append(peao.criar_peao(conexao_bd, cor))
+        tabuleiro.adicionar_peoes(conexao_bd, peoes_cor[cor])
 
     return 0
 
@@ -62,6 +64,7 @@ def rodada(cor):
     0 se foi sucesso,
     levanta erro caso erro.
     """
+    global conexao_bd
 
     jogar_novamente = False
     # rodando dado
@@ -75,7 +78,7 @@ def rodada(cor):
     lista_peoes_possiveis = []
     peoes_finalizados = 0
     for p in lista_peoes:
-        x = tabuleiro.movimentacao_possivel(p, valor_dado)
+        x = tabuleiro.movimentacao_possivel(conexao_bd, p, valor_dado)
         if x == -1:
             raise Exception("IdNaoExiste")
         if x == 0:
@@ -94,7 +97,7 @@ def rodada(cor):
     print("Escolhido o peao %d" % i)
 
     # movendo o peao
-    posicao_final = tabuleiro.mover_peao(peao_pra_mover, valor_dado)
+    posicao_final = tabuleiro.mover_peao(conexao_bd, peao_pra_mover, valor_dado)
     if posicao_final == -1:
         raise Exception("IdNaoExiste2")
 
@@ -104,17 +107,17 @@ def rodada(cor):
     print("Peao movido para a posicao %d" % posicao_final)
 
     # verificar peao comido
-    lista_peoes_posicao = tabuleiro.acessar_posicao(posicao_final)
+    lista_peoes_posicao = tabuleiro.acessar_posicao(conexao_bd, posicao_final)
     if lista_peoes_posicao == 0:  # casa protegida, nao come
         return 0 if not jogar_novamente else 3
 
     for p in lista_peoes_posicao:
-        cor_p = peao.acessar_peao(p)
+        cor_p = peao.acessar_peao(conexao_bd, p)
         if cor_p == cor:  # se for da mesma cor, esquece
             continue
         else:
             print("Peao comido: %d" % p)
-            tabuleiro.reiniciar_peao(p)  # comeu o peao
+            tabuleiro.reiniciar_peao(conexao_bd, p)  # comeu o peao
             jogar_novamente = True
 
     if jogar_novamente:
@@ -122,34 +125,57 @@ def rodada(cor):
     return 0
 
 
-def cor_da_rodada():
-    i = 0
-    while True:
-        yield LISTA_CORES[i]
-        i += 1
-        if i == len(LISTA_CORES):
-            i = 0
-
-
-def rodar_partida():
+def rodar_partida(recuperar=False):
     """Cria e joga uma partida. Retorna 0 ao seu final."""
-
-    print("Criando a partida.")
     criar_partida()
+    if not recuperar:
+        print("Criando a partida.")
+        cores = LISTA_CORES.copy()
+        # [proxima_cor, segunda_cor,...]
+        dados = {'hora_criacao': datetime.datetime.now().isoformat(),
+                 'tempo': 0,
+                 'cores': cores}
+        hora_inicial = datetime.datetime.now()
+        tempo_inicial = 0
 
-    print("Comecando a partida. ")
-    g = cor_da_rodada()
-    x = -1
-    cor = ''
-    while x != 2:
-        if x != 3:  # 3 eh quando a pessoa pode jogar de novo
-            cor = next(g)
+    else:
+        print("Recuperando partida.")
+        dados = armazenamentoDados.recupera_partida_completa(conexao_bd)
+        if dados is None:
+            print("Nenhuma partida para recuperar")
+            return -1
+        cores = dados['cores']
+        minutos, segundos = dados['tempo'].split(':')
+        tempo_inicial = int(minutos) * 60 + int(segundos)
+        hora_inicial = datetime.datetime.now()
+
+    while cores:
+        cor = cores.pop(0)
         print("Vez do %s" % cor)
         x = rodada(cor)
+        if x == 2:
+            print("Voce ganhou!")
+            continue
         if x == 1:
-            print("Voce nao pode jogar nesta rodada.\n")
-        else:
-            print("Jogada realizada com sucesso. \n")
+            print("Voce nao pode realizar nenhum movimento.")
 
-    print("%s ganhou" % cor)
-    return 0
+        print("Rodada finalizada.\n")
+        if x == 3:
+            cores.insert(0, cor)
+        else:
+            cores.append(cor)
+
+        tempo_decorrido = (datetime.datetime.now() - hora_inicial).total_seconds() + tempo_inicial
+        dados['tempo'] = "%d:%d" % (tempo_decorrido // 60, tempo_decorrido % 60)
+
+        armazenamentoDados.salvar_partida_completa(conexao_bd, dados)
+
+
+if __name__ == '__main__':
+    aaa = input("Digite ENTER para comecar uma partida, ou qualquer outra tecla para continuar uma passada.")
+    if aaa == '':
+        rodar_partida()
+    else:
+        rodar_partida(True)
+
+    baseDados.fechar_conexao(conexao_bd)

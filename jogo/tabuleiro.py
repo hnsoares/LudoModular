@@ -26,6 +26,8 @@ Esquema da numeracao das casas:
 11/10 (Daniel): Corrigindo reset do tabuleiro
 """
 
+from dados import baseDados
+
 N_CORES = 4  # definindo o default do numero de jogadores como 4
 N_PEOES = 4  # definindo o default do numero de peoes por jogador como 4
 ID_CASA_FINAL = 1000  # as casas finais comecam em um multiplo de 1000
@@ -33,18 +35,19 @@ ID_CASA_INICIAL = 100  # as casas iniciais comecam em um multiplo de 100
 lista_posicao_iniciais = []  # lista de pos do inicio
 lista_posicao_seguras = []  # lista de posicoes onde nao se pode comer
 lista_posicao_finais = []  # lista de posicoes finais do tabuleiro (ultima casa possivel)
-tabela_peoes = []  # lista para guardar as informacoes do peao
+# tabela_peoes = []  # lista para guardar as informacoes do peao
 cores_acrescentadas = 0   # contador para adicionar peoes. +1 para cada cor acrescentada.
 
 
-def _achar_peao(id_peao):
+def _achar_peao(c, id_peao):
     """
-    Recebe um id, retorna a posicao na tabela, -1 se nao existir.
+    Recebe um id, retorna suas informacoes, -1 se nao existir.
     """
-    for i, p in enumerate(tabela_peoes):
-        if p['id'] == id_peao:
-            return i
-    return -1
+    # for i, p in enumerate(tabela_peoes):
+    #     if p['id'] == id_peao:
+    #         return i
+
+    return baseDados.selecionar_tabuleiro(c, peao=id_peao)
 
 
 def _definir_posicoes_iniciais(n, m=N_PEOES):
@@ -79,12 +82,13 @@ def _definir_posicoes_finais(n):
     return
 
 
-def iniciar_tabuleiro(n=N_CORES):
+def iniciar_tabuleiro(c, n=N_CORES):
     """
     Recebe o numero de jogadores, e inicia o tabuleiro. Retorna 0.
     """
-    global cores_acrescentadas, N_CORES, tabela_peoes
-    tabela_peoes.clear()
+    global cores_acrescentadas, N_CORES  # , tabela_peoes
+    # tabela_peoes.clear()
+    baseDados.limpar_tabuleiro(c)
     _definir_posicoes_iniciais(n)
     _definir_posicoes_seguras(n)
     _definir_posicoes_finais(n)
@@ -93,7 +97,7 @@ def iniciar_tabuleiro(n=N_CORES):
     return 0
 
 
-def adicionar_peoes(lista_ids, lista_posicoes=None):
+def adicionar_peoes(c, lista_ids, lista_posicoes=None):
     """
     Recebe uma lista de peoes e uma lista de posicoes atuais e salva na tabela.
     Retorna 0 se sucesso,
@@ -116,9 +120,11 @@ def adicionar_peoes(lista_ids, lista_posicoes=None):
         return 2
 
     for i, id_peao in enumerate(lista_ids):
-        for p in tabela_peoes:
-            if id_peao == p['id']:
-                return 1
+        # for p in tabela_peoes:
+        #     if id_peao == p['id']:
+        #        return 1
+        if baseDados.selecionar_tabuleiro(c, id_peao) != -1:
+            return 1
 
         d = dict()
         d['id'] = id_peao
@@ -132,39 +138,48 @@ def adicionar_peoes(lista_ids, lista_posicoes=None):
             d['eh_finalizado'] = False
             d['eh_inicio'] = True
 
-        tabela_peoes.append(d)
+        # tabela_peoes.append(d)
+        baseDados.adicionar_tabuleiro(c, d['id'], d['pos'], d['pos_inicial'], d['eh_inicio'], d['eh_finalizado'])
 
     cores_acrescentadas += 1
 
     return 0
 
 
-def acessar_posicao(pos):
+def acessar_posicao(c, pos):
     """Retorna uma lista dos ids naquela posicao, 0 se a casa for segura."""
     if pos in lista_posicao_seguras:
         return 0
     # pega o id do x da tabela se x esta na posicao 'pos'
-    return [x['id'] for x in tabela_peoes if x['pos'] == pos]
+    # return [x['id'] for x in tabela_peoes if x['pos'] == pos]
+
+    return [x['id'] for x in baseDados.selecionar_tabuleiro(c, pos=pos)]
 
 
-def reiniciar_peao(id_peao):
+def reiniciar_peao(c, id_peao):
     """
     Realoca o peao para a posicao inicial, reiniciando seus dados.
     0 se sucesso,
     -1 se nao houver esse id.
     """
-    i = _achar_peao(id_peao)
-    if i == -1:
+    # i = _achar_peao(id_peao)
+    # if i == -1:
+    #    return -1
+
+    p = baseDados.selecionar_tabuleiro(c, peao=id_peao)
+    if p == -1:
         return -1
 
-    p = tabela_peoes[i]
+    # p = tabela_peoes[i]
     p['pos'] = p['pos_inicial']
     p['eh_finalizado'] = False
     p['eh_inicio'] = True
+
+    baseDados.modificar_tabuleiro(c, id_peao, p['pos'], p['pos_inicial'], p['eh_inicio'], p['eh_finalizado'])
     return 0
 
 
-def movimentacao_possivel(id_peao, mov):
+def movimentacao_possivel(c, id_peao, mov):
     """
     Retorna se eh possivel movimentar o peao.
     0 se for possivel,
@@ -172,11 +187,15 @@ def movimentacao_possivel(id_peao, mov):
     2 se finalizado
     -1 se nao existir esse id.
     """
-    i = _achar_peao(id_peao)
-    if i == -1:
+    # i = _achar_peao(id_peao)
+    # if i == -1:
+    #    return -1
+    # p = tabela_peoes[i]
+
+    p = baseDados.selecionar_tabuleiro(c, peao=id_peao)
+    if p == -1:
         return -1
 
-    p = tabela_peoes[i]
     pos = p['pos']
     eh_inicio = p['eh_inicio']
     eh_finalizado = p['eh_finalizado']
@@ -195,7 +214,7 @@ def movimentacao_possivel(id_peao, mov):
     return 0
 
 
-def mover_peao(id_peao, mov):
+def mover_peao(c, id_peao, mov):
     """
     Move o peao. Admite-se que a movimentacao ja foi valida. Retorna:
     posicao se o movimento foi feito com sucesso,
@@ -205,11 +224,15 @@ def mover_peao(id_peao, mov):
     OBS: nunca retornara a posicao da ultima casa.
     """
 
-    i = _achar_peao(id_peao)
-    if i == -1:
+    # i = _achar_peao(id_peao)
+    # if i == -1:
+    #     return -1
+    # p = tabela_peoes[i]
+
+    p = baseDados.selecionar_tabuleiro(c, peao=id_peao)
+    if p == -1:
         return -1
 
-    p = tabela_peoes[i]
     pos = p['pos']
     pos_inicial = p['pos_inicial']
     time = pos_inicial // 100  # diz se o time ("cor") eh 1, 2, 3 ou 4.
@@ -218,6 +241,7 @@ def mover_peao(id_peao, mov):
         p['eh_inicio'] = False
         new_pos = 13*(time-1)
         p['pos'] = new_pos
+        baseDados.modificar_tabuleiro(c, id_peao, p['pos'], p['pos_inicial'], p['eh_inicio'], p['eh_finalizado'])
         return new_pos
 
     if pos >= 1000:  # reta final. Confere se o peao finalizou
@@ -225,7 +249,10 @@ def mover_peao(id_peao, mov):
         p['pos'] = new_pos
         if new_pos % 1000 == 5:
             p['eh_finalizado'] = True
+            baseDados.modificar_tabuleiro(c, id_peao, p['pos'], p['pos_inicial'], p['eh_inicio'], p['eh_finalizado'])
             return -2
+
+        baseDados.modificar_tabuleiro(c, id_peao, p['pos'], p['pos_inicial'], p['eh_inicio'], p['eh_finalizado'])
         return new_pos
 
     # primeiro calcula a casa para entrar na reta final
@@ -237,4 +264,6 @@ def mover_peao(id_peao, mov):
         new_pos = new_pos % 52  # senao, so corrige a posicao
 
     p['pos'] = new_pos  # salva e retorna
+
+    baseDados.modificar_tabuleiro(c, id_peao, p['pos'], p['pos_inicial'], p['eh_inicio'], p['eh_finalizado'])
     return new_pos
