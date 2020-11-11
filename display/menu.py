@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter.ttk import *
 from jogo.partida import rodar_partida
+
 __all__ = ['cria_menu']
 
 def testa_numero(root, num):
@@ -12,7 +13,6 @@ def testa_numero(root, num):
 
 def fechar_jogo():
     exit(1)
-    return 1
 
 def cria_menu():
     root = Tk()
