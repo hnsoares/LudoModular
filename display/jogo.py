@@ -2,13 +2,16 @@ import pygame
 from os import sep, path
 from dados import baseDados
 
-TAMANHO_TELA = ALTURA_TELA, COMPRIMENTO_TELA = (1280, 720)
+TAMANHO_TELA = COMPRIMENTO_TELA, ALTURA_TELA = (1280, 720)
 COR_PRETO = (0, 0, 0)
 COR_DEFAULT = (255, 255, 255)
 CORES = {'yellow': (255, 255, 0), 'red': (255, 0, 0), 'blue': (0, 0, 255), 'green': (0, 255, 0)}
 ARQUIVO_MUSICA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'musica.wav'])
+ARQUIVO_FUNDO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'tabuleiro720.png'])
 RAIO = 24
 screen = None  # tela a ser configurada
+imagem_fundo = None
+rect_imagem_fundo = None
 dict_peoes = {}
 dict_posicoes = {0: (312, 648),
                  1: (312, 600),
@@ -110,7 +113,7 @@ def find_pos(pos):
 
 
 def inicializar(c):
-    global screen, dict_peoes
+    global screen, dict_peoes, imagem_fundo, rect_imagem_fundo
     pygame.init()
     screen = pygame.display.set_mode(TAMANHO_TELA)
     pygame.display.set_caption("Ludo")
@@ -118,6 +121,11 @@ def inicializar(c):
     pygame.mixer.music.load(ARQUIVO_MUSICA)
     pygame.mixer.music.set_volume(0.01)
     pygame.mixer.music.play(loops=True, fade_ms=1000)
+
+    imagem_fundo = pygame.image.load(ARQUIVO_FUNDO)
+    rect_imagem_fundo = imagem_fundo.get_rect()
+    rect_imagem_fundo.x = (COMPRIMENTO_TELA - ALTURA_TELA) // 2
+    rect_imagem_fundo.y = 0
 
     dict_peoes = coletar_todos_peoes(c)
 
@@ -177,6 +185,7 @@ def atualiza_peao(c, i):
 
 def atualiza_tela(c, peoes=None, destacar=None):
     screen.fill(COR_PRETO)
+    screen.blit(imagem_fundo, rect_imagem_fundo)
 
     if peoes is not None:
         for p in peoes:
