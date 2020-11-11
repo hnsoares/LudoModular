@@ -201,21 +201,21 @@ class TestesDado(unittest.TestCase):
 
 class TestesPartida(unittest.TestCase):
     def test_criar_partida(self):
-        x = jogo.partida.criar_partida(False)
+        x = jogo.partida._criar_partida(False)
         self.assertEqual(x, 0, 'criando partida')
 
     def test_rodada(self):
-        jogo.partida.criar_partida()
+        jogo.partida._criar_partida()
         jogo.partida.escolher_peao = Mock(return_value=0)  # overwrite a escolha do peao
         cores = jogo.partida.LISTA_CORES
         for i in range(20):  # fazer 20 rodadas, ver se todas deram certo.
-            x = jogo.partida.rodada(cores[i % 4])
-            self.assertTrue(0 <= x <= 3, 'fazendo uma rodada')
+            x = jogo.partida._rodada(cores[i % 4])
+            self.assertTrue(0 <= x <= 3, 'fazendo uma _rodada')
 
     # def test_rodar_partida(self):
-    #     jogo.partida.criar_partida()
+    #     jogo.partida._criar_partida()
     #     jogo.partida.escolher_peao = Mock(return_value=0)  # overwrite a escolha do peao
-    #     x = jogo.partida.rodar_partida()
+    #     x = jogo.partida._rodar_partida()
     #     self.assertEqual(x, 0, 'rodando a partida')
 
     # escolher_peao eh uma funcao temporaria (enquanto nao ha graficos)

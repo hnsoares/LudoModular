@@ -145,10 +145,10 @@ def inicializar(c):
     rect_imagem_fundo.x = (COMPRIMENTO_TELA - ALTURA_TELA) // 2  # posiciona no centro
     rect_imagem_fundo.y = 0
 
-    monta_cache_peoes(c)
+    _monta_cache_peoes(c)
 
 
-def checa_eventos():
+def _checa_eventos():
     """
     Verifica a interacao com a interface grafica.
     Se o jogo fechar, ele fecha sem salvar.
@@ -169,7 +169,7 @@ def checa_eventos():
     return
 
 
-def monta_cache_peoes(c):
+def _monta_cache_peoes(c):
     """
     Pega todos os peoes e informacoes necessarias para criar um cache interno.
     """
@@ -189,7 +189,7 @@ def monta_cache_peoes(c):
     return
 
 
-def desenha_peao(cor, pos, destacar=False):
+def _desenha_peao(cor, pos, destacar=False):
     """
     Tenta desenhar um peao na tela.
     Se destacar for True, o peao sera destacado
@@ -211,7 +211,7 @@ def desenha_peao(cor, pos, destacar=False):
         pygame.draw.circle(screen, COR_DEFAULT, (x, y), RAIO_CIRCULO, width=RAIO_CIRCULO // 4)
 
 
-def atualiza_peao(c, i):
+def _atualiza_peao(c, i):
     """Recebe um id, e atualiza o cache interno."""
     p = baseDados.selecionar_tabuleiro(c, peao=i)
     dict_peoes[i][1] = p['pos']
@@ -231,14 +231,14 @@ def atualiza_tela(c, atualizar=None, destacar=None):
 
     if atualizar is not None:  # atualiza os peoes no cache
         for p in atualizar:
-            atualiza_peao(c, p)
+            _atualiza_peao(c, p)
 
     for p in dict_peoes:  # desenha todos os peoes.
         peao = dict_peoes[p]
         if destacar is not None:  # tem que verificar se aquele peao eh destacavel
-            desenha_peao(peao[0], peao[1], p in destacar)  # p in destacar eh true se ele deve ser destacado
+            _desenha_peao(peao[0], peao[1], p in destacar)  # p in destacar eh true se ele deve ser destacado
         else:
-            desenha_peao(peao[0], peao[1])  # se nao, joga tudo como false
+            _desenha_peao(peao[0], peao[1])  # se nao, joga tudo como false
 
     pygame.display.flip()  # atualiza a tela
 
@@ -251,7 +251,7 @@ def escolhe_peao(c, lista):
     # lista de posicoes de cada peao
     posicoes_lista = [dict_posicoes[baseDados.selecionar_tabuleiro(c, peao=x)['pos']] for x in lista]
     while True:
-        pos = checa_eventos()
+        pos = _checa_eventos()
         if pos is not None:  # o mouse foi clicado
             x, y = pos  # posicao do mouse
             for i, pos1 in enumerate(posicoes_lista):

@@ -17,7 +17,7 @@ conexao_bd = None  # conexao com BD a ser feita
 peoes_atualizar_grafico = []
 
 
-def criar_partida(cores):
+def _criar_partida(cores):
     """
     Cria uma partida. Retorna os seus dados.
     """
@@ -43,7 +43,7 @@ def criar_partida(cores):
     return dados
 
 
-def carrega_partida():
+def _carrega_partida():
     """Carrega uma partida. Retorna seus dados, ou -1 se nao havia partida anterior."""
     global conexao_bd
     if conexao_bd is None:
@@ -60,9 +60,9 @@ def carrega_partida():
     return dados
 
 
-def rodada(cor):
+def _rodada(cor):
     """
-    Faz a rodada.
+    Faz a _rodada.
     3 se pode jogar novamente.
     2 se vitoria,
     1 se nao fez nada,
@@ -138,7 +138,7 @@ def rodada(cor):
     return 0
 
 
-def rodar_partida(dados):
+def _rodar_partida(dados):
     """Joga uma partida. Retorna 0 ao seu final."""
 
     cores = dados['cores']
@@ -150,7 +150,7 @@ def rodar_partida(dados):
         cor = cores.pop(0)
         print("Vez do %s" % cor)
         jogo.atualiza_tela(conexao_bd, peoes_atualizar_grafico)
-        x = rodada(cor)
+        x = _rodada(cor)
         if x == 2:
             print("Voce ganhou!")
             continue
@@ -176,18 +176,19 @@ def inicia_partida(lista_cores):
     Inicia uma partida.
     Recebe as cores da partida e a cria.
     Se for uma lista vazia, recupera uma partida antiga.
+    E depois, roda.
     """
     global conexao_bd
     conexao_bd = baseDados.iniciar_conexao()
-    if not lista_cores:
-        dados = carrega_partida()
+    if len(lista_cores) == 0:
+        dados = _carrega_partida()
         data_criacao = dados['hora_criacao']
         tempo_jogado = dados['tempo']
         print("Carregando a partida criada em %s, jogada por %s" % (data_criacao, tempo_jogado))
 
-    dados = criar_partida(lista_cores)
+    dados = _criar_partida(lista_cores)
 
     jogo.inicializar(conexao_bd)
-    rodar_partida(dados)
+    _rodar_partida(dados)
     baseDados.fechar_conexao(conexao_bd)
     return
