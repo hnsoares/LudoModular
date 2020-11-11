@@ -34,25 +34,47 @@ def escolher_peao(lista):
     return int(x)
 
 
-def criar_partida(limpar=True):
+def criar_partida(cores):
     """
-    Inicializa a partida, criando os peoes e jogadores.
-    Retorna 0.
+    Cria uma partida. Retorna os seus dados.
     """
     global conexao_bd
-
-    conexao_bd = baseDados.iniciar_conexao(limpar)
+    if conexao_bd is None:
+        conexao_bd = baseDados.iniciar_conexao()
     peao.limpar_peoes(conexao_bd)
+    tabuleiro.limpar_tabuleiro(conexao_bd)
     peoes_cor.clear()
-    tabuleiro.iniciar_tabuleiro(conexao_bd, len(LISTA_CORES))  # 4 cores
+    tabuleiro.configurar_tabuleiro(len(cores))
 
-    for cor in LISTA_CORES:
-        peoes_cor[cor] = list()
+    for cor in cores:
+        temp = []
         for i in range(4):
-            peoes_cor[cor].append(peao.criar_peao(conexao_bd, cor))
-        tabuleiro.adicionar_peoes(conexao_bd, peoes_cor[cor])
+            temp.append(peao.criar_peao(conexao_bd, cor))
+        tabuleiro.adicionar_peoes(conexao_bd, temp)
 
-    return 0
+    dados = {'hora_criacao': datetime.datetime.now().isoformat(),
+             'tempo': '0:0',
+             'cores': cores,
+             'jogadores': len(cores)}
+
+    return dados
+
+
+def carrega_partida():
+    """Carrega uma partida. Retorna seus dados, ou -1 se nao havia partida anterior."""
+    global conexao_bd
+    if conexao_bd is None:
+        conexao_bd = baseDados.iniciar_conexao()
+    peao.limpar_peoes(conexao_bd)
+    tabuleiro.limpar_tabuleiro(conexao_bd)
+
+    dados = armazenamentoDados.recupera_partida_completa(conexao_bd)
+    if dados is None:
+        return -1
+
+    tabuleiro.configurar_tabuleiro((dados['jogadores']))
+
+    return dados
 
 
 def rodada(cor):
@@ -74,7 +96,9 @@ def rodada(cor):
     print("Rodei o dado: %d" % valor_dado)
 
     # descobrindo os valores possiveis
-    lista_peoes = peoes_cor[cor]
+    # lista_peoes = peoes_cor[cor]
+    lista_peoes = peao.acessar_peao(conexao_bd, cor=cor)
+
     lista_peoes_possiveis = []
     peoes_finalizados = 0
     for p in lista_peoes:
@@ -125,29 +149,13 @@ def rodada(cor):
     return 0
 
 
-def rodar_partida(recuperar=False):
-    """Cria e joga uma partida. Retorna 0 ao seu final."""
-    criar_partida()
-    if not recuperar:
-        print("Criando a partida.")
-        cores = LISTA_CORES.copy()
-        # [proxima_cor, segunda_cor,...]
-        dados = {'hora_criacao': datetime.datetime.now().isoformat(),
-                 'tempo': 0,
-                 'cores': cores}
-        hora_inicial = datetime.datetime.now()
-        tempo_inicial = 0
+def rodar_partida(dados):
+    """Joga uma partida. Retorna 0 ao seu final."""
 
-    else:
-        print("Recuperando partida.")
-        dados = armazenamentoDados.recupera_partida_completa(conexao_bd)
-        if dados is None:
-            print("Nenhuma partida para recuperar")
-            return -1
-        cores = dados['cores']
-        minutos, segundos = dados['tempo'].split(':')
-        tempo_inicial = int(minutos) * 60 + int(segundos)
-        hora_inicial = datetime.datetime.now()
+    cores = dados['cores']
+    minutos, segundos = dados['tempo'].split(':')
+    tempo_decorrido_inicial = int(minutos) * 60 + int(segundos)
+    hora_inicial = datetime.datetime.now()
 
     while cores:
         cor = cores.pop(0)
@@ -165,17 +173,28 @@ def rodar_partida(recuperar=False):
         else:
             cores.append(cor)
 
-        tempo_decorrido = (datetime.datetime.now() - hora_inicial).total_seconds() + tempo_inicial
+        tempo_decorrido = (datetime.datetime.now() - hora_inicial).total_seconds() + tempo_decorrido_inicial
         dados['tempo'] = "%d:%d" % (tempo_decorrido // 60, tempo_decorrido % 60)
 
         armazenamentoDados.salvar_partida_completa(conexao_bd, dados)
 
+    return 0
+
 
 if __name__ == '__main__':
-    aaa = input("Digite ENTER para comecar uma partida, ou qualquer outra tecla para continuar uma passada.")
+    aaa = input("Digite um numero de jogadores para começar uma partida, ou ENTER para carregar: ")
     if aaa == '':
-        rodar_partida()
+        d = carrega_partida()
+        data_criacao = d['hora_criacao']
+        tempo_jogado = d['tempo']
+        print("Carregando a partida criada em %s, jogada por %s" % (data_criacao, tempo_jogado))
+
     else:
-        rodar_partida(True)
+        q = int(aaa)
+        c = [input("Digite uma cor: ") for i in range(q)]
+        print(c)
+        d = criar_partida(c)
+
+    rodar_partida(d)
 
     baseDados.fechar_conexao(conexao_bd)
