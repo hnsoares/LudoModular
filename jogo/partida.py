@@ -18,10 +18,12 @@ from jogo import tabuleiro
 from dados import baseDados
 from dados import armazenamentoDados
 import datetime
+from display import jogo
 
 LISTA_CORES = ['yellow', 'green', 'red', 'blue']
 peoes_cor = dict()
 conexao_bd = None  # conexao com BD a ser feita
+peoes_atualizar_grafico = []
 
 
 def escolher_peao(lista):
@@ -86,8 +88,9 @@ def rodada(cor):
     0 se foi sucesso,
     levanta erro caso erro.
     """
-    global conexao_bd
+    global conexao_bd, peoes_atualizar_grafico
 
+    peoes_atualizar_grafico.clear()
     jogar_novamente = False
     # rodando dado
     valor_dado = dado.jogar_dado()
@@ -116,9 +119,13 @@ def rodada(cor):
         return 1 if not jogar_novamente else 3
 
     # escolhendo o peao a mover
-    i = escolher_peao(lista_peoes_possiveis)
+    # i = escolher_peao(lista_peoes_possiveis)
+    print(lista_peoes_possiveis)
+    jogo.atualiza_tela(conexao_bd, destacar=lista_peoes_possiveis)
+    i = jogo.escolhe_peao(conexao_bd, lista_peoes_possiveis)
     peao_pra_mover = lista_peoes_possiveis[i]
     print("Escolhido o peao %d" % i)
+    peoes_atualizar_grafico.append(peao_pra_mover)
 
     # movendo o peao
     posicao_final = tabuleiro.mover_peao(conexao_bd, peao_pra_mover, valor_dado)
@@ -142,6 +149,7 @@ def rodada(cor):
         else:
             print("Peao comido: %d" % p)
             tabuleiro.reiniciar_peao(conexao_bd, p)  # comeu o peao
+            peoes_atualizar_grafico.append(p)
             jogar_novamente = True
 
     if jogar_novamente:
@@ -160,6 +168,7 @@ def rodar_partida(dados):
     while cores:
         cor = cores.pop(0)
         print("Vez do %s" % cor)
+        jogo.atualiza_tela(conexao_bd, peoes_atualizar_grafico)
         x = rodada(cor)
         if x == 2:
             print("Voce ganhou!")
@@ -191,10 +200,15 @@ if __name__ == '__main__':
 
     else:
         q = int(aaa)
-        c = [input("Digite uma cor: ") for i in range(q)]
-        print(c)
+        if not 2 <= q <= 4:
+            print("Quantidade invalida. Somente entre 2 a 4. Abortando...")
+            exit(0)
+        # c = [input("Digite uma cor: ") for i in range(q)]
+        c = LISTA_CORES[:q]
+        # print(c)
         d = criar_partida(c)
 
+    jogo.inicializar(conexao_bd)
     rodar_partida(d)
 
     baseDados.fechar_conexao(conexao_bd)
