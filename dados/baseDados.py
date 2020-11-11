@@ -149,8 +149,8 @@ def iniciar_conexao(limpar=True):
     print("Conectado ao MySQL " + c.get_server_info())
 
     _iniciar_tabelas(c)
-    limpar_peao(c)
-    limpar_tabuleiro(c)
+    # limpar_peao(c)
+    # limpar_tabuleiro(c)
 
     return c
 
@@ -184,20 +184,32 @@ def adicionar_peao(c, id_peao, cor_peao):
     return 0
 
 
-def selecionar_peao(c, peao):
+def selecionar_peao(c, peao=None, cor=None):
     """
-    Procura a cor daquele peca.
-    Retorna a cor se achar, ou '' se nao achar.
+    Procura a cor/id daquele peca/cor.
+    Retorna a cor se achar, ou '' se nao achar, ou None se nao tiver aquela cor
     """
-    cursor = c.cursor()
-    q = "SELECT cor FROM %s WHERE id=%d" % (TABELA_PEOES, peao)
-    cursor.execute(q)
-    r = cursor.fetchone()
 
-    cursor.close()
-    if r is None:
-        return ''
-    return r[0]
+    cursor = c.cursor()
+    if peao is not None:
+        q = "SELECT cor FROM %s WHERE id=%d" % (TABELA_PEOES, peao)
+        cursor.execute(q)
+        r = cursor.fetchone()
+
+        cursor.close()
+        if r is None:
+            return ''
+        return r[0]
+
+    if cor is not None:
+        q = "SELECT id FROM %s WHERE cor='%s'" % (TABELA_PEOES, cor)
+        cursor.execute(q)
+        r = cursor.fetchall()
+        cursor.close()
+        if r is None:
+            return None
+        r = [x[0] for x in r]
+        return r
 
 
 def limpar_peao(c):

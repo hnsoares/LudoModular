@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Módulo Peao
 
@@ -41,7 +40,7 @@ def criar_peao(c, cor):
     return peao['id']
 
 
-def acessar_peao(c, id_peao):
+def acessar_peao(c, id_peao=None, cor=None):
     """Acessa a cor do peao. Retorna:
     cor
     string vazia se nao existir esse id.
@@ -49,4 +48,4 @@ def acessar_peao(c, id_peao):
     # for p in peoes:
     #     if p['id'] == id_peao:
     #         return p['cor']
-    return baseDados.selecionar_peao(c, id_peao)
+    return baseDados.selecionar_peao(c, id_peao, cor)

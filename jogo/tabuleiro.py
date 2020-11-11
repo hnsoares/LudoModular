@@ -31,11 +31,11 @@ from dados import baseDados
 N_CORES = 4  # definindo o default do numero de jogadores como 4
 N_PEOES = 4  # definindo o default do numero de peoes por jogador como 4
 ID_CASA_FINAL = 1000  # as casas finais comecam em um multiplo de 1000
-ID_CASA_INICIAL = 100  # as casas iniciais comecam em um multiplo de 100
-lista_posicao_iniciais = []  # lista de pos do inicio
-lista_posicao_seguras = []  # lista de posicoes onde nao se pode comer
-lista_posicao_finais = []  # lista de posicoes finais do tabuleiro (ultima casa possivel)
-# tabela_peoes = []  # lista para guardar as informacoes do peao
+ID_CASA_INICIAL = 100 if N_CORES > 2 else 200  # as casas iniciais comecam em um multiplo de 100 ou 200
+lista_posicao_iniciais = [[x * ID_CASA_INICIAL + y for y in range(N_PEOES)] for x in range(1, N_CORES + 1)]
+lista_posicao_seguras = [0, 8, 13, 21, 26, 34, 39, 47]  # lista de posicoes onde nao se pode comer
+lista_posicao_finais = [ID_CASA_FINAL * n + 5 for n in range(1, N_CORES + 1)]  # lista de posicoes finais do tabuleiro
+
 cores_acrescentadas = 0   # contador para adicionar peoes. +1 para cada cor acrescentada.
 
 
@@ -50,48 +50,15 @@ def _achar_peao(c, id_peao):
     return baseDados.selecionar_tabuleiro(c, peao=id_peao)
 
 
-def _definir_posicoes_iniciais(n, m=N_PEOES):
-    """
-    Recebe um numero n (ate 9) de jogadores, retorna uma lista de n elementos,
-    em que cada elemento eh uma lista das posicoes m das casas iniciais.
-    """
-    global lista_posicao_iniciais
-    lista_posicao_iniciais = [[x * ID_CASA_INICIAL + y for y in range(m)] for x in range(1, n + 1)]
-    return
-
-
-def _definir_posicoes_seguras(n):
-    """
-    Recebe o numero de jogadores, e salva a lista de posicoes de casas seguras.
-    """
-    global lista_posicao_seguras
-    lista_posicao_seguras.clear()
-    for i in range(n):
-        lista_posicao_seguras.append(13 * i)
-        lista_posicao_seguras.append(13 * i + 8)
-    return
-
-
-def _definir_posicoes_finais(n):
-    """
-    Recebe o numero de jogadores, e salva a lista das ultimas posicoes (casa final).
-    """
-    global lista_posicao_finais
-    lista_posicao_finais = []
-    lista_posicao_finais = [ID_CASA_FINAL * n + 5 for n in range(1, n + 1)]
-    return
-
-
-def iniciar_tabuleiro(c, n=N_CORES):
-    """
-    Recebe o numero de jogadores, e inicia o tabuleiro. Retorna 0.
-    """
-    global cores_acrescentadas, N_CORES  # , tabela_peoes
+def limpar_tabuleiro(c):
     # tabela_peoes.clear()
     baseDados.limpar_tabuleiro(c)
-    _definir_posicoes_iniciais(n)
-    _definir_posicoes_seguras(n)
-    _definir_posicoes_finais(n)
+    return 0
+
+
+def configurar_tabuleiro(n=N_CORES):
+    """Configura o tabuleiro e o prepara. Retorna 0"""
+    global cores_acrescentadas, N_CORES
     cores_acrescentadas = 0
     N_CORES = n
     return 0
