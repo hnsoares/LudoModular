@@ -1,15 +1,7 @@
 """
 Modulo Partida
-iniciar_tabuleiro()
-adicionar_peoes()
-acessar_posicao()
-reiniciar_peao()
-movimentacao_possivel()
-mover_peao()
 
-28/09 (Guilherme): Modulo criado
-05/10 (Daniel): Recomecando (reescrevendo tudo)
-16/10 (Daniel): Jogar novamente
+Feito por Daniel
 """
 
 from jogo import dado
@@ -18,23 +10,14 @@ from jogo import tabuleiro
 from dados import baseDados
 from dados import armazenamentoDados
 import datetime
+from display import jogo
 
-LISTA_CORES = ['yellow', 'green', 'red', 'blue']
 peoes_cor = dict()
 conexao_bd = None  # conexao com BD a ser feita
+peoes_atualizar_grafico = []
 
 
-def escolher_peao(lista):
-    print("Escolha o peão: ")
-    for i, a in enumerate(lista):
-        print('(digite %d): id %d' % (i, a))
-    x = input('Sua escolha: ')
-    while not (x.isdigit() and (0 <= int(x) < len(lista))):
-        x = input("Sua escolha: ")
-    return int(x)
-
-
-def criar_partida(cores):
+def _criar_partida(cores):
     """
     Cria uma partida. Retorna os seus dados.
     """
@@ -60,7 +43,7 @@ def criar_partida(cores):
     return dados
 
 
-def carrega_partida():
+def _carrega_partida():
     """Carrega uma partida. Retorna seus dados, ou -1 se nao havia partida anterior."""
     global conexao_bd
     if conexao_bd is None:
@@ -77,17 +60,18 @@ def carrega_partida():
     return dados
 
 
-def rodada(cor):
+def _rodada(cor):
     """
-    Faz a rodada.
+    Faz a _rodada.
     3 se pode jogar novamente.
     2 se vitoria,
     1 se nao fez nada,
     0 se foi sucesso,
     levanta erro caso erro.
     """
-    global conexao_bd
+    global conexao_bd, peoes_atualizar_grafico
 
+    peoes_atualizar_grafico.clear()
     jogar_novamente = False
     # rodando dado
     valor_dado = dado.jogar_dado()
@@ -111,22 +95,32 @@ def rodada(cor):
             # o peao ja foi finalizado
             peoes_finalizados += 1
 
+    if peoes_finalizados == 4:
+        return 2  # se o cara ja tiver ganhado, manda que ja ganhou, por garantia
+
     print("Movimentos possiveis: %d" % len(lista_peoes_possiveis))
     if not lista_peoes_possiveis:
         return 1 if not jogar_novamente else 3
 
     # escolhendo o peao a mover
-    i = escolher_peao(lista_peoes_possiveis)
+    # i = escolher_peao(lista_peoes_possiveis)
+    print(lista_peoes_possiveis)
+    jogo.atualiza_tela(conexao_bd, destacar=lista_peoes_possiveis)
+    i = jogo.escolhe_peao(conexao_bd, lista_peoes_possiveis)
     peao_pra_mover = lista_peoes_possiveis[i]
     print("Escolhido o peao %d" % i)
+    peoes_atualizar_grafico.append(peao_pra_mover)
 
     # movendo o peao
     posicao_final = tabuleiro.mover_peao(conexao_bd, peao_pra_mover, valor_dado)
     if posicao_final == -1:
         raise Exception("IdNaoExiste2")
 
-    if posicao_final == -2 and peoes_finalizados == 3:  # ja tinha acabado tres e acabou outro agora
-        return 2
+    if posicao_final == -2:
+        if peoes_finalizados == 3:  # ja tinha acabado tres e acabou outro agora
+            return 2
+        print("Voce chegou ate o final com seu peao!")
+        return 3  # pode jogar de novo
 
     print("Peao movido para a posicao %d" % posicao_final)
 
@@ -142,6 +136,7 @@ def rodada(cor):
         else:
             print("Peao comido: %d" % p)
             tabuleiro.reiniciar_peao(conexao_bd, p)  # comeu o peao
+            peoes_atualizar_grafico.append(p)
             jogar_novamente = True
 
     if jogar_novamente:
@@ -149,7 +144,7 @@ def rodada(cor):
     return 0
 
 
-def rodar_partida(dados):
+def _rodar_partida(dados):
     """Joga uma partida. Retorna 0 ao seu final."""
 
     cores = dados['cores']
@@ -160,10 +155,11 @@ def rodar_partida(dados):
     while cores:
         cor = cores.pop(0)
         print("Vez do %s" % cor)
-        x = rodada(cor)
+        jogo.atualiza_tela(conexao_bd, peoes_atualizar_grafico)
+        x = _rodada(cor)
         if x == 2:
             print("Voce ganhou!")
-            continue
+            continue  # a cor nao volta pra lista de cores
         if x == 1:
             print("Voce nao pode realizar nenhum movimento.")
 
@@ -181,20 +177,27 @@ def rodar_partida(dados):
     return 0
 
 
-if __name__ == '__main__':
-    aaa = input("Digite um numero de jogadores para começar uma partida, ou ENTER para carregar: ")
-    if aaa == '':
-        d = carrega_partida()
-        data_criacao = d['hora_criacao']
-        tempo_jogado = d['tempo']
-        print("Carregando a partida criada em %s, jogada por %s" % (data_criacao, tempo_jogado))
+def inicia_partida(lista_cores):
+    """
+    Inicia uma partida.
+    Recebe as cores da partida e a cria.
+    Se for uma lista vazia, recupera uma partida antiga.
+    E depois, roda.
+    """
+    global conexao_bd
+    conexao_bd = baseDados.iniciar_conexao()
 
-    else:
-        q = int(aaa)
-        c = [input("Digite uma cor: ") for i in range(q)]
-        print(c)
-        d = criar_partida(c)
+    print("Criando/Carregando a partida.")
+    if len(lista_cores) == 0:
+        dados = _carrega_partida()
+        data_criacao = dados['hora_criacao']
+        tempo_jogado = dados['tempo']
 
-    rodar_partida(d)
+    dados = _criar_partida(lista_cores)
 
+    print("Iniciando a partida criada em %s, jogada por %s minutos" % (dados['hora_criacao'], dados['tempo']))
+    jogo.inicializar(conexao_bd)
+    _rodar_partida(dados)
     baseDados.fechar_conexao(conexao_bd)
+    print("Fechando conexao.")
+    return

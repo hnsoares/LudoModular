@@ -1,8 +1,13 @@
 """
-Main da build #1
+Main da build #3
 """
-import tkinter
-from display.menu import cria_menu
+
+from display import menu
 
 
-cria_menu()
+def main():
+    menu.cria_menu()
+
+
+if __name__ == '__main__':
+    main()
