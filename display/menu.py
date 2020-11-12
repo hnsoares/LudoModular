@@ -11,7 +11,7 @@ HEIGHT = 400
 FORMATO = "%sx%s" % (WIDTH, HEIGHT)
 
 
-def testa_numero(root, escolha):
+def chama_partida_nova(root, escolha):
     if escolha.isdigit():
         escolha = int(escolha)
         root.destroy()
@@ -20,7 +20,6 @@ def testa_numero(root, escolha):
         cria_menu()
     else:
         print('Valor inválido!')
-
 
 def fechar_jogo():
     exit(1)
@@ -33,8 +32,8 @@ def cria_menu():
     combo = Combobox(root, width=29)
     combo['values'] = ('Escolha o número de jogadores', 2, 3, 4)
     combo.current(0)
-    carregar_button = Button(root, text="Carregar Partida", command=lambda: testa_numero(root, '0'), width=20)
-    iniciar_button = Button(root, text='Iniciar Partida', command=lambda: testa_numero(root, combo.get()), width=20)
+    carregar_button = Button(root, text="Carregar Partida", command=lambda: chama_partida_nova(root, '0'), width=20)
+    iniciar_button = Button(root, text='Iniciar Partida', command=lambda: chama_partida_nova(root, combo.get()), width=20)
     fechar = Button(root, text='Fechar', command=fechar_jogo, width=20)
 
     iniciar_button.place(x=WIDTH / 2 - 70, y=HEIGHT * 5 / 7 - 60)

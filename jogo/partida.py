@@ -182,6 +182,7 @@ def inicia_partida(lista_cores):
     Inicia uma partida.
     Recebe as cores da partida e a cria.
     Se for uma lista vazia, recupera uma partida antiga.
+        Se nao tiver partida, retorna erro.
     E depois, roda.
     """
     global conexao_bd
@@ -190,10 +191,8 @@ def inicia_partida(lista_cores):
     print("Criando/Carregando a partida.")
     if len(lista_cores) == 0:
         dados = _carrega_partida()
-        data_criacao = dados['hora_criacao']
-        tempo_jogado = dados['tempo']
-
-    dados = _criar_partida(lista_cores)
+    else:
+        dados = _criar_partida(lista_cores)
 
     print("Iniciando a partida criada em %s, jogada por %s minutos" % (dados['hora_criacao'], dados['tempo']))
     jogo.inicializar(conexao_bd)
