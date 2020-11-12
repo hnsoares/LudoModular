@@ -178,6 +178,7 @@ def iniciar_conexao():
     print("Conectado ao MySQL " + c.get_server_info())
 
     _iniciar_tabelas(c)
+    print("Tabelas montadas.")
     # limpar_peao(c)
     # limpar_tabuleiro(c)
 

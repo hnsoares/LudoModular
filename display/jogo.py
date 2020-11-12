@@ -24,7 +24,7 @@ RAIO_CIRCULO = 24
 
 ARQUIVO_MUSICA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'musica.wav'])
 ARQUIVO_FUNDO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'tabuleiro720.png'])
-ARQUIVO_POSICOES = sep.join([path.dirname(path.abspath(__file__)), 'posicoes.json'])
+ARQUIVO_POSICOES = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'posicoes.json'])
 
 screen = None  # tela a ser configurada
 imagem_fundo = None  # imagem de fundo que vai ser carregada
@@ -43,6 +43,8 @@ def inicializar(c):
     Retorna nada.
     """
     global screen, imagem_fundo, rect_imagem_fundo, dict_posicoes
+    print("Iniciando pygame: ", end='')
+
     pygame.init()
     screen = pygame.display.set_mode(TAMANHO_TELA)
     pygame.display.set_caption("Ludo")
@@ -65,8 +67,11 @@ def inicializar(c):
         # lambda vai ser uma funcao que recebe o dic, e retorna faz um dict comprehension
         # que pega a chave, transforma em int, e atribui ao conteudo, pego atraves de dict.items()
         dict_posicoes = load(f, object_hook=lambda d: {int(a): b for a, b in d.items()})
+    print("DONE")
 
+    print("Carrengando peoes: ", end="")
     _monta_cache_peoes(c)
+    print("DONE")
 
 
 def _checa_eventos():
@@ -187,4 +192,5 @@ def escolhe_peao(c, lista):
 
 
 def fechar():
+    print("Fechando o jogo")
     pygame.quit()

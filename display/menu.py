@@ -15,6 +15,7 @@ def testa_numero(root, escolha):
     if escolha.isdigit():
         escolha = int(escolha)
         root.destroy()
+        print("Iniciando partida: ")
         partida.inicia_partida(CORES[:escolha])
         cria_menu()
     else:

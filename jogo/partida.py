@@ -186,15 +186,18 @@ def inicia_partida(lista_cores):
     """
     global conexao_bd
     conexao_bd = baseDados.iniciar_conexao()
+
+    print("Criando/Carregando a partida.")
     if len(lista_cores) == 0:
         dados = _carrega_partida()
         data_criacao = dados['hora_criacao']
         tempo_jogado = dados['tempo']
-        print("Carregando a partida criada em %s, jogada por %s" % (data_criacao, tempo_jogado))
 
     dados = _criar_partida(lista_cores)
 
+    print("Iniciando a partida criada em %s, jogada por %s minutos" % (dados['hora_criacao'], dados['tempo']))
     jogo.inicializar(conexao_bd)
     _rodar_partida(dados)
     baseDados.fechar_conexao(conexao_bd)
+    print("Fechando conexao.")
     return
