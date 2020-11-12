@@ -12,7 +12,7 @@ FORMATO = "%sx%s" % (WIDTH, HEIGHT)
 
 
 def testa_numero(root, escolha):
-    if type(escolha) == int or escolha.isdigit():
+    if escolha.isdigit():
         escolha = int(escolha)
         root.destroy()
         partida.inicia_partida(CORES[:escolha])
@@ -32,7 +32,7 @@ def cria_menu():
     combo = Combobox(root, width=29)
     combo['values'] = ('Escolha o número de jogadores', 2, 3, 4)
     combo.current(0)
-    carregar_button = Button(root, text="Carregar Partida", command=lambda: testa_numero(root, 0), width=20)
+    carregar_button = Button(root, text="Carregar Partida", command=lambda: testa_numero(root, '0'), width=20)
     iniciar_button = Button(root, text='Iniciar Partida', command=lambda: testa_numero(root, combo.get()), width=20)
     fechar = Button(root, text='Fechar', command=fechar_jogo, width=20)
 

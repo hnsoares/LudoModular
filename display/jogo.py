@@ -6,6 +6,7 @@ Funcoes:
     inicializar(c)
     escolhe_peao(c, lista)
     atualiza_tela(c, [peoes], [destacar])
+    fechar()
 
 Feita por Daniel
 """
@@ -78,6 +79,7 @@ def _checa_eventos():
     """
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            fechar()
             exit(0)
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_F3:
@@ -182,3 +184,7 @@ def escolhe_peao(c, lista):
                 # print(dist, x, y, x1, y1)
                 if dist <= RAIO_CIRCULO ** 2:
                     return i
+
+
+def fechar():
+    pygame.quit()

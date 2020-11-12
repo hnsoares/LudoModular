@@ -95,6 +95,9 @@ def _rodada(cor):
             # o peao ja foi finalizado
             peoes_finalizados += 1
 
+    if peoes_finalizados == 4:
+        return 2  # se o cara ja tiver ganhado, manda que ja ganhou, por garantia
+
     print("Movimentos possiveis: %d" % len(lista_peoes_possiveis))
     if not lista_peoes_possiveis:
         return 1 if not jogar_novamente else 3
@@ -113,8 +116,11 @@ def _rodada(cor):
     if posicao_final == -1:
         raise Exception("IdNaoExiste2")
 
-    if posicao_final == -2 and peoes_finalizados == 3:  # ja tinha acabado tres e acabou outro agora
-        return 2
+    if posicao_final == -2:
+        if peoes_finalizados == 3:  # ja tinha acabado tres e acabou outro agora
+            return 2
+        print("Voce chegou ate o final com seu peao!")
+        return 3  # pode jogar de novo
 
     print("Peao movido para a posicao %d" % posicao_final)
 
@@ -153,7 +159,7 @@ def _rodar_partida(dados):
         x = _rodada(cor)
         if x == 2:
             print("Voce ganhou!")
-            continue
+            continue  # a cor nao volta pra lista de cores
         if x == 1:
             print("Voce nao pode realizar nenhum movimento.")
 
