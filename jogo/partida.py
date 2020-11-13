@@ -182,7 +182,7 @@ def inicia_partida(lista_cores):
     Inicia uma partida.
     Recebe as cores da partida e a cria.
     Se for uma lista vazia, recupera uma partida antiga.
-        Se nao tiver partida, retorna erro.
+        Se nao tiver partida, retorn False.
     E depois, roda.
     """
     global conexao_bd
@@ -190,6 +190,8 @@ def inicia_partida(lista_cores):
 
     print("Criando/Carregando a partida.")
     if len(lista_cores) == 0:
+        if not armazenamentoDados.detecta_partida_completa():
+            return False
         dados = _carrega_partida()
     else:
         dados = _criar_partida(lista_cores)

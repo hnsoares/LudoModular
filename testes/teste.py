@@ -1,11 +1,11 @@
 import unittest
-from unittest.mock import Mock
 import jogo.peao
 import jogo.tabuleiro
 import jogo.dado
 import jogo.partida
 import dados.baseDados as BD
 import dados.armazenamentoDados as AD
+from os import remove  # para testar partida antiga
 
 conexao_bd = BD.iniciar_conexao()  # para ser usado durante os testes da BaseDados
 if not conexao_bd.is_connected():
@@ -77,21 +77,20 @@ class TestesArmazenamentoDados(unittest.TestCase):
         x = AD.salvar_partida_completa(conexao_bd, dados)
         self.assertEqual(x, 0, 'salvando partida')
 
-    def test_exclui_partida_completa(self):
+    def test_detecta_partida_completa(self):
         AD.salvar_partida_completa(conexao_bd)
-        x = AD.exclui_partida_completa()
-        self.assertEqual(0, x, 'excluindo partida 1')
-        x = AD.exclui_partida_completa()
-        self.assertEqual(-1, x, 'excluindo partida 2')
+        x = AD.detecta_partida_completa()
+        self.assertTrue(x, 'detecta partida')
+        path_partida_antiga = AD.PATH + AD.ARQUIVO_PARTIDA
+        remove(path_partida_antiga)
+        x = AD.detecta_partida_completa()
+        self.assertFalse(x, 'detecta partida 2')
 
     def test_recupera_partida_completa(self):
         dados = {'boa': 'tarde'}
         AD.salvar_partida_completa(conexao_bd, dados)
         x = AD.recupera_partida_completa(conexao_bd)
-        self.assertDictEqual(x, dados, 'recuperando partida 1')
-        AD.exclui_partida_completa()
-        x = AD.recupera_partida_completa(conexao_bd)
-        self.assertIsNone(x, 'recuperando partida 2')
+        self.assertDictEqual(x, dados, 'recuperando partida')
 
 
 class TestesPeao(unittest.TestCase):
@@ -119,18 +118,19 @@ class TestesPeao(unittest.TestCase):
 
 class TestesTabuleiro(unittest.TestCase):
 
-    def test_iniciar_tabuleiro(self):
-        self.assertEqual(jogo.tabuleiro.iniciar_tabuleiro(conexao_bd, 4), 0, 'Iniciando tabuleiro com 4 pessoas.')
-        jogo.tabuleiro.adicionar_peoes(conexao_bd, [1, 2, 3, 4])
-        self.assertEqual(jogo.tabuleiro.iniciar_tabuleiro(conexao_bd, 5), 0, 'Iniciando tabuleiro com 5 pessoas.')
-        self.assertEqual(jogo.tabuleiro.reiniciar_peao(conexao_bd, 1), -1, 'tentando usar peao que nao existe mais.')
+    def test_configurar_tabuleiro(self):
+        self.assertEqual(0, jogo.tabuleiro.configurar_tabuleiro(4))
+        self.assertEqual(0, jogo.tabuleiro.configurar_tabuleiro(3))
+        self.assertEqual(0, jogo.tabuleiro.configurar_tabuleiro(2))
 
     def test_adicionar_peoes(self):
         # 0 -> sucesso
         # 1 -> id_repetido
         # 2 -> lista invalida
         # 3 -> limite maximo atingido
-        jogo.tabuleiro.iniciar_tabuleiro(conexao_bd, 4)
+        jogo.tabuleiro.configurar_tabuleiro(4)
+        BD.limpar_tabuleiro(conexao_bd)
+
         lista1 = [0, 1, 2, 3]
         lista2 = [5, 6, 7, 8]
         lista3 = [9, 10, 11]
@@ -148,12 +148,10 @@ class TestesTabuleiro(unittest.TestCase):
         jogo.tabuleiro.adicionar_peoes(conexao_bd, [34, 35, 36, 37])
         x = jogo.tabuleiro.adicionar_peoes(conexao_bd, [111, 222, 333, 444])
         self.assertEqual(x, 3, 'adicionando com limite maximo atingido')
-        jogo.tabuleiro.iniciar_tabuleiro(conexao_bd, 4)
-        x = jogo.tabuleiro.adicionar_peoes(conexao_bd, [])
-        self.assertEqual(x, 2, 'adicionando uma lista vazia')
 
     def test_acessar_posicao(self):
-        jogo.tabuleiro.iniciar_tabuleiro(conexao_bd, 4)
+        jogo.tabuleiro.configurar_tabuleiro(4)
+        BD.limpar_tabuleiro(conexao_bd)
         jogo.tabuleiro.adicionar_peoes(conexao_bd, [1, 2, 3, 4], [5, 6, 7, 7])
         self.assertIn(1, jogo.tabuleiro.acessar_posicao(conexao_bd, 5), 'acessando posicao')
         self.assertIn(2, jogo.tabuleiro.acessar_posicao(conexao_bd, 6), 'acessando posicao')
@@ -162,7 +160,8 @@ class TestesTabuleiro(unittest.TestCase):
         self.assertEqual(jogo.tabuleiro.acessar_posicao(conexao_bd, 0), 0)
 
     def test_reiniciar_peao(self):
-        jogo.tabuleiro.iniciar_tabuleiro(conexao_bd, 4)
+        jogo.tabuleiro.configurar_tabuleiro(4)
+        BD.limpar_tabuleiro(conexao_bd)
         jogo.tabuleiro.adicionar_peoes(conexao_bd, [1, 2, 3, 4], [1, 2, 3, 4])
         self.assertEqual(0, jogo.tabuleiro.reiniciar_peao(conexao_bd, 1), 'reiniciando peao')
         self.assertEqual(-1, jogo.tabuleiro.reiniciar_peao(conexao_bd, 6), 'reiniciando peao nao existente')
@@ -170,7 +169,9 @@ class TestesTabuleiro(unittest.TestCase):
         self.assertEqual(jogo.tabuleiro.movimentacao_possivel(conexao_bd, 2, 3), 0, 'mover peao nao reiniciado')
 
     def test_movimentacao_possivel(self):
-        jogo.tabuleiro.iniciar_tabuleiro(conexao_bd, 4)
+        jogo.tabuleiro.configurar_tabuleiro(4)
+        BD.limpar_tabuleiro(conexao_bd)
+
         jogo.tabuleiro.adicionar_peoes(conexao_bd, [1, 2, 3, 4])
         jogo.tabuleiro.adicionar_peoes(conexao_bd, [5, 6, 7, 8], [1005, 1004, 0, 0])
         self.assertEqual(jogo.tabuleiro.movimentacao_possivel(conexao_bd, 1, 3), 1, 'tentando mover inicio')
@@ -181,7 +182,8 @@ class TestesTabuleiro(unittest.TestCase):
         self.assertEqual(jogo.tabuleiro.movimentacao_possivel(conexao_bd, 123, 123), -1, 'mover peao inexistente')
 
     def test_mover_peao(self):
-        jogo.tabuleiro.iniciar_tabuleiro(conexao_bd, 4)
+        jogo.tabuleiro.configurar_tabuleiro(4)
+        BD.limpar_tabuleiro(conexao_bd)
         jogo.tabuleiro.adicionar_peoes(conexao_bd, [1, 2, 3, 4])
         jogo.tabuleiro.adicionar_peoes(conexao_bd, [5, 6, 7, 8], [13, 10, 2000, 2004])
         self.assertEqual(jogo.tabuleiro.mover_peao(conexao_bd, 1, 6), 0, 'movendo peao pra casa 0')
@@ -200,29 +202,12 @@ class TestesDado(unittest.TestCase):
 
 
 class TestesPartida(unittest.TestCase):
-    def test_criar_partida(self):
-        x = jogo.partida._criar_partida(False)
-        self.assertEqual(x, 0, 'criando partida')
-
-    def test_rodada(self):
-        jogo.partida._criar_partida()
-        jogo.partida.escolher_peao = Mock(return_value=0)  # overwrite a escolha do peao
-        cores = jogo.partida.LISTA_CORES
-        for i in range(20):  # fazer 20 rodadas, ver se todas deram certo.
-            x = jogo.partida._rodada(cores[i % 4])
-            self.assertTrue(0 <= x <= 3, 'fazendo uma _rodada')
-
-    # def test_rodar_partida(self):
-    #     jogo.partida._criar_partida()
-    #     jogo.partida.escolher_peao = Mock(return_value=0)  # overwrite a escolha do peao
-    #     x = jogo.partida._rodar_partida()
-    #     self.assertEqual(x, 0, 'rodando a partida')
-
-    # escolher_peao eh uma funcao temporaria (enquanto nao ha graficos)
-    # cor_da_rodada eh um gerador, nao uma funcao. Por isso nao ha testes
-
-
-
+    def teste_inicia_partida(self):
+        # essa funcao roda a partida completa. A execucao ficaria parada esperando o jogador jogar
+        # por isso, o unico teste sera para ver se ele da erro quando nao houver partida
+        if AD.detecta_partida_completa():
+            remove(AD.PATH + AD.ARQUIVO_PARTIDA)
+        self.assertFalse(jogo.partida.inicia_partida([]), 'carregando partida nao existe')
 
 
 if __name__ == '__main__':

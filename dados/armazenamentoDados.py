@@ -13,7 +13,7 @@ Feita por Daniel
 from dados import baseDados
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from os import path, sep, remove  # so para o armazenamento funcionar e para remover uma partida salva
+from os import path, sep  # so para o armazenamento funcionar e para remover uma partida salva
 
 PATH = path.dirname(path.abspath(__file__)) + sep + 'arquivos' + sep
 ARQUIVO_PARTIDA = 'partida.xml'

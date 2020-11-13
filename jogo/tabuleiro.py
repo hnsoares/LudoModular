@@ -21,9 +21,7 @@ Esquema da numeracao das casas:
 
     casas seguras: 13*i e 13*i + 8, i: 0 .. 3
 
-05/10 (Daniel): Funcoes de acesso do tabuleiro
-06/10 (Daniel): Refatorando pequenos detalhes
-11/10 (Daniel): Corrigindo reset do tabuleiro
+Feito por Daniel
 """
 
 from dados import baseDados
