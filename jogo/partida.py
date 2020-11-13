@@ -10,7 +10,7 @@ from jogo import tabuleiro
 from dados import baseDados
 from dados import armazenamentoDados
 import datetime
-from display import jogo
+from display import GUIJogo
 
 peoes_cor = dict()
 conexao_bd = None  # conexao com BD a ser feita
@@ -105,8 +105,8 @@ def _rodada(cor):
     # escolhendo o peao a mover
     # i = escolher_peao(lista_peoes_possiveis)
     print(lista_peoes_possiveis)
-    jogo.atualiza_tela(conexao_bd, destacar=lista_peoes_possiveis)
-    i = jogo.escolhe_peao(conexao_bd, lista_peoes_possiveis)
+    GUIJogo.atualiza_tela(conexao_bd, destacar=lista_peoes_possiveis)
+    i = GUIJogo.escolhe_peao(conexao_bd, lista_peoes_possiveis)
     peao_pra_mover = lista_peoes_possiveis[i]
     print("Escolhido o peao %d" % i)
     peoes_atualizar_grafico.append(peao_pra_mover)
@@ -155,7 +155,7 @@ def _rodar_partida(dados):
     while cores:
         cor = cores.pop(0)
         print("Vez do %s" % cor)
-        jogo.atualiza_tela(conexao_bd, peoes_atualizar_grafico)
+        GUIJogo.atualiza_tela(conexao_bd, peoes_atualizar_grafico)
         x = _rodada(cor)
         if x == 2:
             print("Voce ganhou!")
@@ -195,7 +195,7 @@ def inicia_partida(lista_cores):
         dados = _criar_partida(lista_cores)
 
     print("Iniciando a partida criada em %s, jogada por %s minutos" % (dados['hora_criacao'], dados['tempo']))
-    jogo.inicializar(conexao_bd)
+    GUIJogo.inicializar(conexao_bd)
     _rodar_partida(dados)
     baseDados.fechar_conexao(conexao_bd)
     print("Fechando conexao.")

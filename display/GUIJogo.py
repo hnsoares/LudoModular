@@ -32,6 +32,9 @@ rect_imagem_fundo = None  # objeto da image de fundo que vai ser carregada
 dict_peoes = {}  # dicionario para guardar os peoes (cache)
 dict_posicoes = None  # dicionario para posicoes (gerado no inicializar)
 
+font_texto = None
+texto_exemplo = None
+
 
 def inicializar(c):
     """
@@ -43,6 +46,8 @@ def inicializar(c):
     Retorna nada.
     """
     global screen, imagem_fundo, rect_imagem_fundo, dict_posicoes
+    global font_texto, texto_exemplo
+
     print("Iniciando pygame: ", end='')
 
     pygame.init()
@@ -72,6 +77,10 @@ def inicializar(c):
     print("Carrengando peoes: ", end="")
     _monta_cache_peoes(c)
     print("DONE")
+
+    # TEXTOS
+    font_texto = pygame.font.SysFont('bahnschrift.ttf', 24)
+    texto_exemplo = font_texto.render('F3/F4 -> Pausa/Continua musica', True, COR_DEFAULT)
 
 
 def _checa_eventos():
@@ -167,7 +176,12 @@ def atualiza_tela(c, atualizar=None, destacar=None):
         else:
             _desenha_peao(peao[0], peao[1])  # se nao, joga tudo como false
 
+    texto_exemplo_rect = texto_exemplo.get_rect()
+    texto_exemplo_rect.x, texto_exemplo_rect.y = 0, 0
+    screen.blit(texto_exemplo, texto_exemplo_rect)
+
     pygame.display.flip()  # atualiza a tela
+    pygame.time.wait(500)  # espera 500ms
 
 
 def escolhe_peao(c, lista):

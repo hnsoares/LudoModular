@@ -3,7 +3,7 @@ Módulo para armazenamento permanente de Dados.
 A sua função é guardar os arquivos da base de dados e armazenar em arquivos XML.
 
 Funcoes:
-    exclui_partida_completa()
+    detecta_partida_completa()
     recupera_partida_completa(c)
     salva_partida_completa(c, [dados])
 
@@ -129,17 +129,13 @@ def salvar_partida_completa(c, dados=None):
     return 0
 
 
-def exclui_partida_completa():
+def detecta_partida_completa():
     """
-    Exclui uma partida que havia sido salva.
-    0 se sucesso,
-    -1 se nao havia partida
+    Detecta se ha uma partida salva.
+    Retorna True/False
     """
     nome_arquivo = PATH + ARQUIVO_PARTIDA
-    if path.exists(nome_arquivo):
-        remove(nome_arquivo)
-        return 0
-    return -1
+    return path.exists(nome_arquivo)
 
 
 def recupera_partida_completa(c):
