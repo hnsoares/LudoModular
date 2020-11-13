@@ -34,5 +34,15 @@ Antes de jogar, primeiro você precisa criar um arquivo `dados/arquivos/credenci
 
 Mais informações no arquivo `dados/arquivos/exemplo_credenciais.txt`
 
+Após isso, execute o arquivo `main.py`. Abrirá uma tela contendo algumas opções. Você pode criar um novo jogo escolhendo uma quantidade
+de jogadores, ou carregar alguma partida anterior, se houver.
+
+No jogo, o dado por é rodado automaticamente (seu valor, por enquanto, é exibido no `stdin`, não na tela). Os peões que você
+pode escolher se destacarão, e ao clicar em um deles, ele será movimentado. Se não houver, a vez será passada automaticamente.
+
+Você pode sair do jogo em qualquer momento que ele será guardado.
+
+Se quiser parar a música, clique `F3`. Se quiser continuar a música, clique `F4`.
+
 ### Testes
-O arquivo de testes está na pasta `testes`, no arquivo `teste.py`.
+O arquivo de testes está em `testes/teste.py`. Ao executar, ele fará todos os testes dos jogos automaticamente.
