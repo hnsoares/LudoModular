@@ -63,16 +63,13 @@ def _conectar_mysql_jogo():
     credenciais = _pegar_credenciais()
     if credenciais is None:
         return None
-    try:
-        c = mysql.connector.connect(
-            host=credenciais[0],
-            user=credenciais[1],
-            password=credenciais[2],
-            database=_BD  # mesma coisa que a funcao abaixo, mas com o BD
-        )
-        return c
-    except Error as e:
-        return e
+    c = mysql.connector.connect(
+        host=credenciais[0],
+        user=credenciais[1],
+        password=credenciais[2],
+        database=_BD  # mesma coisa que a funcao abaixo, mas com o BD
+    )
+    return c
 
 
 def _conectar_mysql():
@@ -86,15 +83,12 @@ def _conectar_mysql():
 
     if credenciais is None:
         return None
-    try:
-        c = mysql.connector.connect(
-            host=credenciais[0],
-            user=credenciais[1],
-            password=credenciais[2]
-        )
-        return c
-    except Error as e:
-        return e
+    c = mysql.connector.connect(
+        host=credenciais[0],
+        user=credenciais[1],
+        password=credenciais[2]
+    )
+    return c
 
 
 def _criar_bd_jogo(c):
@@ -159,24 +153,20 @@ def iniciar_conexao():
     Estabelece uma conexao com o banco de dados.
     Retorna o objeto, ou levanta erro..
     """
-    c = _conectar_mysql_jogo()  # conecta diretamente ao BD do jogo
-    if c is None:  # erro de leitura de arquivo
-        return None
+    try:
+        c = _conectar_mysql_jogo()  # tento conectar com a base de dados
+    except Error:  # se nao existir
+        try:
+            c = _conectar_mysql()  # conecto sem ser na base de dados
+            _criar_bd_jogo(c)  # crio ela
+            c.close()  # fecho a conexao
+            c = _conectar_mysql_jogo()  # recomeco outra conexao, dessa vez com a base de dados
+        except Error as e:  # se ainda nao conseguir
+            print("Nao consegui criar uma base de dados: ", e)
+            print("Abortando.")
+            exit(1)
 
-    if c is Error:  # pode nao existir o BD jogo
-        c = _conectar_mysql()
-        if c is Error:  # nao conseguiu nem conectar sem ser no jogo
-            print("Erro de conexao: ", c)
-            return None
-
-        _criar_bd_jogo(c)  # cria o BD do jogo
-        c.close()
-        c = _conectar_mysql_jogo()  # tenta novamente a conexao
-
-    if c is Error:  # o erro nao era o BD do jogo...
-        print("Erro de conexao ao MySQL ", c)
-        return None
-
+    # se consegui conectar com a base de dados
     print("Conectado ao MySQL " + c.get_server_info())
 
     _iniciar_tabelas(c)
