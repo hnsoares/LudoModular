@@ -48,8 +48,10 @@ def _pegar_credenciais():
         with open(p + 'credenciais.txt', 'r') as f:
             return f.read().split('\n')
     except Exception as e:
+        print("Nao foi possivel achar o arquivo credenciais.txt. Leia o README.md para mais informacoes.")
         print("Erro lendo arquivo: ", e)
-        return None
+        exit(0)
+        # return None
 
 
 def _conectar_mysql_jogo():
@@ -155,7 +157,7 @@ def _iniciar_tabelas(c):
 def iniciar_conexao():
     """
     Estabelece uma conexao com o banco de dados.
-    Retorna o objeto, ou None se deu erro.
+    Retorna o objeto, ou levanta erro..
     """
     c = _conectar_mysql_jogo()  # conecta diretamente ao BD do jogo
     if c is None:  # erro de leitura de arquivo
