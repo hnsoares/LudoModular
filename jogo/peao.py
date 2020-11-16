@@ -5,7 +5,6 @@ limpar_peoes()
 criar_peao()
 acessar_peao()
 
-28/09 (Guilherme): Modulo criado
 05/10 (Daniel): Recomecando (deletando classes)
 05/10 (Daniel): Movimentacao do Peao
 05/10 (Daniel): Refazendo peao (peao so contem cor)

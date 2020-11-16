@@ -1,3 +1,16 @@
+"""
+Modulo para a interface grafica do menu.
+Sua funcao eh gerenciar a interface inicial, e criar a partida.
+
+Funcoes:
+    chama_partida_nova()
+    chama_partida_salva()
+    fechar_jogo()
+    cria_menu()
+
+Feita por Marcos
+"""
+
 from tkinter import *
 from tkinter.ttk import *
 
@@ -13,6 +26,7 @@ FORMATO = "%sx%s" % (WIDTH, HEIGHT)
 
 
 def chama_partida_nova(root, escolha):
+    """Inicia uma partida nova. Cria o menu quando acabar a partida."""
     if escolha.isdigit():
         escolha = int(escolha)
         root.destroy()
@@ -24,6 +38,10 @@ def chama_partida_nova(root, escolha):
 
 
 def chama_partida_salva(root):
+    """
+    Carrega uma partida salva. Cria o menu quando acabar a partida
+    Se não houver partida salva, retorna nada.
+    """
     if not AD.detecta_partida_completa():
         print("Nao ha partida salva.")
         return
@@ -34,10 +52,12 @@ def chama_partida_salva(root):
 
 
 def fechar_jogo():
+    """Fecha o jogo."""
     exit(1)
 
 
 def cria_menu():
+    """Cria o menu com os botoes."""
     root = Tk()  # cria o elemento root
     root.geometry(FORMATO)
     root.title('LUDO')
