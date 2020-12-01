@@ -32,6 +32,11 @@ from os import path, sep  # so para as credenciais funcionarem
 _BD = "ludomodular"  # nome do banco de dados
 TABELA_PEOES = 'peoes'
 TABELA_TABULEIRO = 'tabuleiro'
+PATH_CREDENCIAIS = path.dirname(path.abspath(__file__)) + sep + 'arquivos' + sep + 'credenciais.txt'
+
+
+def existe_arquivo_credenciais():
+    return path.exists(PATH_CREDENCIAIS)
 
 
 def _pegar_credenciais():
@@ -42,13 +47,14 @@ def _pegar_credenciais():
     'user'
     password'
     """
-    p = path.dirname(path.abspath(__file__)) + sep + 'arquivos' + sep  # cria o path para o arquivo
+    if not existe_arquivo_credenciais():
+        print("Nao foi possivel achar o arquivo credenciais.txt. Leia o README.md para mais informacoes.")
+        exit(0)
 
     try:
-        with open(p + 'credenciais.txt', 'r') as f:
+        with open(PATH_CREDENCIAIS, 'r') as f:
             return f.read().split('\n')
     except Exception as e:
-        print("Nao foi possivel achar o arquivo credenciais.txt. Leia o README.md para mais informacoes.")
         print("Erro lendo arquivo: ", e)
         exit(0)
         # return None
