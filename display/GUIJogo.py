@@ -36,6 +36,11 @@ ARQUIVO_BOTAO_MUSICA_ON = sep.join([path.dirname(path.abspath(__file__)), '..', 
 ARQUIVO_BOTAO_MUSICA_OFF = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'bmusica_off.png'])
 ARQUIVO_BOTAO_SOM_ON = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'bsom_on.png'])
 ARQUIVO_BOTAO_SOM_OFF = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'bsom_off.png'])
+ARQUIVO_PECA_VERDE = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca_verde.png'])
+ARQUIVO_PECA_AZUL = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca_azul.png'])
+ARQUIVO_PECA_VERMELHO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca_vermelho.png'])
+ARQUIVO_PECA_AMARELO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca_amarelo.png'])
+ARQUIVO_PECA_SELECAO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'selecao.png'])
 
 
 screen = None  # tela a ser configurada
@@ -62,6 +67,8 @@ rect_botao_som = None
 
 lista_chat = None   # cada elemento eh [frase, cor]
 
+imagens_peca = {}
+
 
 def inicializar(c):
     """
@@ -78,8 +85,9 @@ def inicializar(c):
     global botao_musica_on, rect_botao_musica, botao_musica_off
     global botao_som_on, botao_som_off, rect_botao_som
     global lista_chat
+    global imagens_peca
 
-    print("Iniciando pygame: ", end='')
+    # print("Iniciando pygame: ", end='')
 
     pygame.init()
     screen = pygame.display.set_mode(TAMANHO_TELA)
@@ -121,23 +129,29 @@ def inicializar(c):
         # lambda vai ser uma funcao que recebe o dic, e retorna faz um dict comprehension
         # que pega a chave, transforma em int, e atribui ao conteudo, pego atraves de dict.items()
         dict_posicoes = load(f, object_hook=lambda d: {int(a): b for a, b in d.items()})
-    print("DONE")
+    # print("DONE")
 
-    print("Carrengando peoes: ", end="")
+    # print("Carrengando peoes: ", end="")
     _monta_cache_peoes(c)
-    print("DONE")
+    # print("DONE")
 
     # TEXTOS
     font_texto = pygame.font.SysFont('bahnschrift.ttf', 34, bold=False)
     lista_chat = list()
     lista_chat.append(("Bem vindo ao Ludo!", 'default'))
 
+    # pecas
+    imagens_peca['red'] = pygame.image.load(ARQUIVO_PECA_VERMELHO)
+    imagens_peca['green'] = pygame.image.load(ARQUIVO_PECA_VERDE)
+    imagens_peca['blue'] = pygame.image.load(ARQUIVO_PECA_AZUL)
+    imagens_peca['yellow'] = pygame.image.load(ARQUIVO_PECA_AMARELO)
+    imagens_peca['selecao'] = pygame.image.load(ARQUIVO_PECA_SELECAO)
+
 
 def _checa_eventos():
     """
     Verifica a interacao com a interface grafica.
     Se o jogo fechar, ele fecha sem salvar.
-    F3 e F4 pausam e continuam a musica.
     Retorna a posicao do mouse se houver algum clique.
     Senao, retorna nada.
     """
@@ -199,14 +213,25 @@ def _desenha_peao(cor, pos, destacar=False):
 
     x, y = dict_posicoes[pos]
     x += 280
+    # x -= 20
+    # y -= 20
+
     if cor not in CORES:
         c = COR_DEFAULT
     else:
         c = CORES[cor]
 
-    pygame.draw.circle(screen, c, (x, y), RAIO_CIRCULO)
+    # pygame.draw.circle(screen, c, (x, y), RAIO_CIRCULO)
     if destacar:
-        pygame.draw.circle(screen, COR_DEFAULT, (x, y), RAIO_CIRCULO, width=RAIO_CIRCULO // 4)
+        imagem_peca = imagens_peca['selecao']
+        rect_peao = imagem_peca.get_rect()
+        rect_peao.x, rect_peao.y = x, y
+        screen.blit(imagem_peca, rect_peao)
+
+    imagem_peca = imagens_peca[cor]
+    rect_peao = imagem_peca.get_rect()
+    rect_peao.x, rect_peao.y = x, y
+    screen.blit(imagem_peca, rect_peao)
 
 
 def _atualiza_peao(c, i):
