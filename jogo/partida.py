@@ -78,6 +78,7 @@ def _rodada(cor):
     if valor_dado == 6:
         jogar_novamente = True
     print("Rodei o dado: %d" % valor_dado)
+    GUIJogo.toca_som(1)
 
     # descobrindo os valores possiveis
     # lista_peoes = peoes_cor[cor]
@@ -158,6 +159,7 @@ def _rodar_partida(dados):
         GUIJogo.atualiza_tela(conexao_bd, peoes_atualizar_grafico)
         x = _rodada(cor)
         if x == 2:
+            GUIJogo.toca_som(3)
             print("Voce ganhou!")
             continue  # a cor nao volta pra lista de cores
         if x == 1:
@@ -165,8 +167,10 @@ def _rodar_partida(dados):
 
         print("Rodada finalizada.\n")
         if x == 3:
+            GUIJogo.toca_som(2)
             cores.insert(0, cor)
         else:
+            GUIJogo.toca_som(0)
             cores.append(cor)
 
         tempo_decorrido = (datetime.datetime.now() - hora_inicial).total_seconds() + tempo_decorrido_inicial

@@ -25,6 +25,10 @@ RAIO_CIRCULO = 24
 ARQUIVO_MUSICA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'musica.wav'])
 ARQUIVO_FUNDO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'tabuleiro720.png'])
 ARQUIVO_POSICOES = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'posicoes.json'])
+ARQUIVO_SOM_PECA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca.wav'])
+ARQUIVO_SOM_CAPTURA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'captura.wav'])
+ARQUIVO_SOM_VITORIA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'vitoria.wav'])
+ARQUIVO_SOM_DADO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado.wav'])
 
 screen = None  # tela a ser configurada
 imagem_fundo = None  # imagem de fundo que vai ser carregada
@@ -34,6 +38,12 @@ dict_posicoes = None  # dicionario para posicoes (gerado no inicializar)
 
 font_texto = None
 texto_exemplo = None
+
+bool_tocar_som = True
+som_peca = None
+som_captura = None
+som_vitoria = None
+som_dado = None
 
 
 def inicializar(c):
@@ -47,6 +57,7 @@ def inicializar(c):
     """
     global screen, imagem_fundo, rect_imagem_fundo, dict_posicoes
     global font_texto, texto_exemplo
+    global som_peca, som_captura, som_vitoria, som_dado
 
     print("Iniciando pygame: ", end='')
 
@@ -58,6 +69,12 @@ def inicializar(c):
     pygame.mixer.music.load(ARQUIVO_MUSICA)
     pygame.mixer.music.set_volume(0.01)
     pygame.mixer.music.play(loops=True, fade_ms=1000)
+
+    # SOM
+    som_peca = pygame.mixer.Sound(ARQUIVO_SOM_PECA)
+    som_captura = pygame.mixer.Sound(ARQUIVO_SOM_CAPTURA)
+    som_vitoria = pygame.mixer.Sound(ARQUIVO_SOM_VITORIA)
+    som_dado = pygame.mixer.Sound(ARQUIVO_SOM_DADO)
 
     # FUNDO
     imagem_fundo = pygame.image.load(ARQUIVO_FUNDO)
@@ -203,6 +220,37 @@ def escolhe_peao(c, lista):
                 # print(dist, x, y, x1, y1)
                 if dist <= RAIO_CIRCULO ** 2:
                     return i
+
+
+def toca_som(som):
+    """
+    Toca o som se ele estiver ligado.
+    0 -> Peça
+    1 -> Dado
+    2 -> Captura
+    3 -> Vitoria
+
+
+    Não retorna nada.
+    """
+    global som_peca, som_captura, som_dado, som_vitoria
+
+    if not bool_tocar_som:
+        return
+
+    if som == 0:
+        som_peca.play()
+
+    elif som == 1:
+        som_dado.play()
+
+    elif som == 2:
+        som_captura.play()
+
+    elif som == 3:
+        som_vitoria.play()
+
+    return
 
 
 def fechar():
