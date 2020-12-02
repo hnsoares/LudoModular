@@ -118,7 +118,7 @@ def cria_menu():
                             command=lambda: chama_partida_nova(root, combo.get()), width=20)
     fechar = Button(root, text='Fechar', command=fechar_jogo, width=20)
     credenciais_bd = Button(root, text="Configurar credenciais", command= lambda: alterar_crendenciais_bd(root),
-                            width=20)
+                            width=20) #aqui
 
     iniciar_button.place(x=WIDTH / 2 - 70, y=HEIGHT * 5 / 7 - 60)
     carregar_button.place(x=WIDTH / 2 - 70, y=HEIGHT * 5 / 7 - 10)
