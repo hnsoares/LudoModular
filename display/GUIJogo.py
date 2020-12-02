@@ -19,13 +19,14 @@ from json import load
 TAMANHO_TELA = COMPRIMENTO_TELA, ALTURA_TELA = (1280, 720)  # por enquanto, se trocar, da ruim
 COR_PRETO = (0, 0, 0)
 COR_DEFAULT = (255, 255, 255)  # branco
-CORES = {'yellow': (255, 255, 0), 'red': (255, 0, 0), 'blue': (0, 0, 255), 'green': (0, 255, 0)}
+CORES = {'yellow': (255, 255, 0), 'red': (255, 0, 0), 'blue': (0, 0, 255), 'green': (0, 255, 0),
+         'default': COR_DEFAULT, 'black': COR_PRETO}
 RAIO_CIRCULO = 24
 
 POS_BOTAO = 20, 20
 
 ARQUIVO_MUSICA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'musica.wav'])
-ARQUIVO_FUNDO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'tabuleiro720.png'])
+ARQUIVO_FUNDO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'tabuleiro720_2.png'])
 ARQUIVO_POSICOES = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'posicoes.json'])
 ARQUIVO_SOM_PECA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca.wav'])
 ARQUIVO_SOM_CAPTURA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'captura.wav'])
@@ -44,7 +45,6 @@ dict_peoes = {}  # dicionario para guardar os peoes (cache)
 dict_posicoes = None  # dicionario para posicoes (gerado no inicializar)
 
 font_texto = None
-texto_exemplo = None
 
 bool_tocar_som = True
 som_peca = None
@@ -60,6 +60,8 @@ botao_som_on = None
 botao_som_off = None
 rect_botao_som = None
 
+lista_chat = None   # cada elemento eh [frase, cor]
+
 
 def inicializar(c):
     """
@@ -71,10 +73,11 @@ def inicializar(c):
     Retorna nada.
     """
     global screen, imagem_fundo, rect_imagem_fundo, dict_posicoes
-    global font_texto, texto_exemplo
+    global font_texto
     global som_peca, som_captura, som_vitoria, som_dado
     global botao_musica_on, rect_botao_musica, botao_musica_off
     global botao_som_on, botao_som_off, rect_botao_som
+    global lista_chat
 
     print("Iniciando pygame: ", end='')
 
@@ -107,7 +110,8 @@ def inicializar(c):
     # FUNDO
     imagem_fundo = pygame.image.load(ARQUIVO_FUNDO)
     rect_imagem_fundo = imagem_fundo.get_rect()
-    rect_imagem_fundo.x = (COMPRIMENTO_TELA - ALTURA_TELA) // 2  # posiciona no centro
+    rect_imagem_fundo.x = 0
+    # (COMPRIMENTO_TELA - ALTURA_TELA) // 2  # posiciona no centro
     rect_imagem_fundo.y = 0
 
     # POSICOES
@@ -124,8 +128,9 @@ def inicializar(c):
     print("DONE")
 
     # TEXTOS
-    font_texto = pygame.font.SysFont('bahnschrift.ttf', 24)
-    texto_exemplo = font_texto.render('F3/F4 -> Pausa/Continua musica', True, COR_DEFAULT)
+    font_texto = pygame.font.SysFont('bahnschrift.ttf', 34, bold=False)
+    lista_chat = list()
+    lista_chat.append(("Bem vindo ao Ludo!", 'default'))
 
 
 def _checa_eventos():
@@ -210,7 +215,7 @@ def _atualiza_peao(c, i):
     dict_peoes[i][1] = p['pos']
 
 
-def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False):
+def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False, chat=None):
     """
     Atualiza a tela da interface do jogo.
     Se atualizar for uma lista de ids:
@@ -220,8 +225,9 @@ def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False):
         Esses peoes serao destacados.
     Se travar_destaque, os destaques nao seram excluidos
     """
+    global lista_chat
 
-    screen.fill(COR_PRETO)  # fundo preto
+    # screen.fill(COR_PRETO)  # fundo preto
     screen.blit(imagem_fundo, rect_imagem_fundo)  # imagem de fundo
     if bool_tocar_musica:
         screen.blit(botao_musica_on, rect_botao_musica)
@@ -251,12 +257,18 @@ def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False):
         elif not travar_destaque:
             dict_peoes[p][2] = False
 
-    # texto_exemplo_rect = texto_exemplo.get_rect()
-    # texto_exemplo_rect.x, texto_exemplo_rect.y = 0, 0
-    # screen.blit(texto_exemplo, texto_exemplo_rect)
+    if chat is not None:
+        lista_chat.insert(0, chat)
+        if len(lista_chat) == 16:
+            lista_chat.pop()
+
+    for i, (frase, cor) in enumerate(lista_chat):
+        texto = font_texto.render(frase, True, CORES[cor])
+        rect_texto = texto.get_rect()
+        rect_texto.x, rect_texto.y = (COMPRIMENTO_TELA + ALTURA_TELA) // 2 + 10, ALTURA_TELA - 30 - 30 * i
+        screen.blit(texto, rect_texto)
 
     pygame.display.flip()  # atualiza a tela
-    pygame.time.wait(100)  # espera 100ms
 
 
 def escolhe_peao(c, lista):
@@ -314,3 +326,17 @@ def toca_som(som):
 def fechar():
     print("Fechando o jogo")
     pygame.quit()
+
+
+def espera_tempo(ms):
+    """Congela o jogo."""
+    pygame.time.wait(ms)  # espera ms
+
+
+def exibe_tela_final_e_fecha():
+    """Exibe tela de vitoria e fecha o jogo depois de 10 segundos."""
+    atualiza_tela(chat=("Jogo encerrado!", 'default'))
+    for i in range(10, 0, -1):
+        atualiza_tela(chat=("Fechando em %ds" % i, 'default'))
+        espera_tempo(1000)
+    fechar()

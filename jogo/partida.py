@@ -78,6 +78,7 @@ def _rodada(cor):
     if valor_dado == 6:
         jogar_novamente = True
     print("Rodei o dado: %d" % valor_dado)
+    GUIJogo.atualiza_tela(travar_destaque=True, chat=('Rodei o dado: %d' % valor_dado, cor))
     GUIJogo.toca_som(1)
 
     # descobrindo os valores possiveis
@@ -100,6 +101,7 @@ def _rodada(cor):
         return 2  # se o cara ja tiver ganhado, manda que ja ganhou, por garantia
 
     print("Movimentos possiveis: %d" % len(lista_peoes_possiveis))
+    # GUIJogo.atualiza_tela(travar_destaque=True, chat=("Movimentos possiveis: %d" % len(lista_peoes_possiveis), cor))
     if not lista_peoes_possiveis:
         return 1 if not jogar_novamente else 3
 
@@ -120,10 +122,12 @@ def _rodada(cor):
     if posicao_final == -2:
         if peoes_finalizados == 3:  # ja tinha acabado tres e acabou outro agora
             return 2
+        GUIJogo.atualiza_tela(travar_destaque=True, chat=("Seu peão chegou na casa final!", cor))
         print("Voce chegou ate o final com seu peao!")
         return 3  # pode jogar de novo
 
     print("Peao movido para a posicao %d" % posicao_final)
+    GUIJogo.atualiza_tela(travar_destaque=True, chat=("Peão movido", cor))
 
     # verificar peao comido
     lista_peoes_posicao = tabuleiro.acessar_posicao(conexao_bd, posicao_final)
@@ -136,6 +140,7 @@ def _rodada(cor):
             continue
         else:
             print("Peao comido: %d" % p)
+            GUIJogo.atualiza_tela(travar_destaque=True, chat=("Peão capturado!", cor))
             tabuleiro.reiniciar_peao(conexao_bd, p)  # comeu o peao
             peoes_atualizar_grafico.append(p)
             jogar_novamente = True
@@ -156,27 +161,35 @@ def _rodar_partida(dados):
     while cores:
         cor = cores.pop(0)
         print("Vez do %s" % cor)
-        GUIJogo.atualiza_tela(conexao_bd, peoes_atualizar_grafico)
+        GUIJogo.atualiza_tela(conexao_bd, chat=("Vez do %s" % cor, cor))
         x = _rodada(cor)
         if x == 2:
             GUIJogo.toca_som(3)
             print("Voce ganhou!")
+            GUIJogo.atualiza_tela(chat=("Voce ganhou!", cor))
             continue  # a cor nao volta pra lista de cores
         if x == 1:
+            GUIJogo.atualiza_tela(chat=("Não há movimentos", cor))
             print("Voce nao pode realizar nenhum movimento.")
 
         print("Rodada finalizada.\n")
         if x == 3:
+            GUIJogo.atualiza_tela(chat=("Jogue novamente", cor))
             GUIJogo.toca_som(2)
             cores.insert(0, cor)
         else:
+            GUIJogo.atualiza_tela(chat=("Rodada finalizada", cor))
             GUIJogo.toca_som(0)
             cores.append(cor)
+
+        GUIJogo.atualiza_tela(c=conexao_bd, atualizar=peoes_atualizar_grafico, chat=("", cor))  # para pular uma linha
 
         tempo_decorrido = (datetime.datetime.now() - hora_inicial).total_seconds() + tempo_decorrido_inicial
         dados['tempo'] = "%d:%d" % (tempo_decorrido // 60, tempo_decorrido % 60)
 
         armazenamentoDados.salvar_partida_completa(conexao_bd, dados)
+
+        GUIJogo.espera_tempo(500)  # atrasa um pouco a proxima rodada
 
     return 0
 
@@ -203,6 +216,7 @@ def inicia_partida(lista_cores):
     print("Iniciando a partida criada em %s, jogada por %s minutos" % (dados['hora_criacao'], dados['tempo']))
     GUIJogo.inicializar(conexao_bd)
     _rodar_partida(dados)
+    GUIJogo.exibe_tela_final_e_fecha()
     baseDados.fechar_conexao(conexao_bd)
     print("Fechando conexao.")
     return
