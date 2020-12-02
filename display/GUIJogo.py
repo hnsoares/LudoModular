@@ -22,6 +22,8 @@ COR_DEFAULT = (255, 255, 255)  # branco
 CORES = {'yellow': (255, 255, 0), 'red': (255, 0, 0), 'blue': (0, 0, 255), 'green': (0, 255, 0)}
 RAIO_CIRCULO = 24
 
+POS_BOTAO = 20, 20
+
 ARQUIVO_MUSICA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'musica.wav'])
 ARQUIVO_FUNDO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'tabuleiro720.png'])
 ARQUIVO_POSICOES = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'posicoes.json'])
@@ -29,6 +31,11 @@ ARQUIVO_SOM_PECA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets
 ARQUIVO_SOM_CAPTURA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'captura.wav'])
 ARQUIVO_SOM_VITORIA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'vitoria.wav'])
 ARQUIVO_SOM_DADO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado.wav'])
+ARQUIVO_BOTAO_MUSICA_ON = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'bmusica_on.png'])
+ARQUIVO_BOTAO_MUSICA_OFF = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'bmusica_off.png'])
+ARQUIVO_BOTAO_SOM_ON = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'bsom_on.png'])
+ARQUIVO_BOTAO_SOM_OFF = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'bsom_off.png'])
+
 
 screen = None  # tela a ser configurada
 imagem_fundo = None  # imagem de fundo que vai ser carregada
@@ -45,6 +52,14 @@ som_captura = None
 som_vitoria = None
 som_dado = None
 
+bool_tocar_musica = True
+botao_musica_on = None
+botao_musica_off = None
+rect_botao_musica = None
+botao_som_on = None
+botao_som_off = None
+rect_botao_som = None
+
 
 def inicializar(c):
     """
@@ -58,6 +73,8 @@ def inicializar(c):
     global screen, imagem_fundo, rect_imagem_fundo, dict_posicoes
     global font_texto, texto_exemplo
     global som_peca, som_captura, som_vitoria, som_dado
+    global botao_musica_on, rect_botao_musica, botao_musica_off
+    global botao_som_on, botao_som_off, rect_botao_som
 
     print("Iniciando pygame: ", end='')
 
@@ -75,6 +92,17 @@ def inicializar(c):
     som_captura = pygame.mixer.Sound(ARQUIVO_SOM_CAPTURA)
     som_vitoria = pygame.mixer.Sound(ARQUIVO_SOM_VITORIA)
     som_dado = pygame.mixer.Sound(ARQUIVO_SOM_DADO)
+
+    # BOTOES
+    botao_musica_on = pygame.image.load(ARQUIVO_BOTAO_MUSICA_ON)
+    rect_botao_musica = botao_musica_on.get_rect()
+    rect_botao_musica.x, rect_botao_musica.y = POS_BOTAO
+    botao_musica_off = pygame.image.load(ARQUIVO_BOTAO_MUSICA_OFF)
+
+    botao_som_on = pygame.image.load(ARQUIVO_BOTAO_SOM_ON)
+    rect_botao_som = botao_som_on.get_rect()
+    rect_botao_som.x, rect_botao_som.y = POS_BOTAO[0], POS_BOTAO[1] + 50 + 20
+    botao_som_off = pygame.image.load(ARQUIVO_BOTAO_SOM_OFF)
 
     # FUNDO
     imagem_fundo = pygame.image.load(ARQUIVO_FUNDO)
@@ -108,17 +136,28 @@ def _checa_eventos():
     Retorna a posicao do mouse se houver algum clique.
     Senao, retorna nada.
     """
+    global bool_tocar_musica, bool_tocar_som
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             fechar()
             exit(0)
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_F3:
-                pygame.mixer.music.pause()
-            elif event.key == pygame.K_F4:
-                pygame.mixer.music.unpause()
+
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            return pygame.mouse.get_pos()
+            x, y = pygame.mouse.get_pos()
+            if POS_BOTAO[0] <= x <= POS_BOTAO[0] + 50 and (POS_BOTAO[1] <= y <= POS_BOTAO[1] + 50):
+                bool_tocar_musica = not bool_tocar_musica
+                if bool_tocar_musica:
+                    pygame.mixer.music.unpause()
+                else:
+                    pygame.mixer.music.pause()
+                atualiza_tela(travar_destaque=True)  # ja que mudou na tela
+
+            elif POS_BOTAO[0] <= x <= POS_BOTAO[0] + 50 and POS_BOTAO[1] + 50 + 20 <= y <= POS_BOTAO[1] + 50 + 50 + 20:
+                bool_tocar_som = not bool_tocar_som
+                atualiza_tela(travar_destaque=True)  # ja que mudou na tela
+
+            return x, y
     return
 
 
@@ -137,7 +176,8 @@ def _monta_cache_peoes(c):
     cursor.execute(q)
 
     for f in cursor.fetchall():
-        dict_peoes[int(f['id'])] = [f['cor'], int(f['pos'])]  # dicionario para o cache interno
+        dict_peoes[int(f['id'])] = [f['cor'], int(f['pos']), False]  # dicionario para o cache interno
+        # o terceiro termo diz se o peao esta destacado ou nao
     cursor.close()
     return
 
@@ -170,35 +210,53 @@ def _atualiza_peao(c, i):
     dict_peoes[i][1] = p['pos']
 
 
-def atualiza_tela(c, atualizar=None, destacar=None):
+def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False):
     """
     Atualiza a tela da interface do jogo.
     Se atualizar for uma lista de ids:
         Esses peoes serao atualizados
+        Precis da conexao com a base de dados
     Se destacar for uma lista de ids:
         Esses peoes serao destacados.
+    Se travar_destaque, os destaques nao seram excluidos
     """
 
     screen.fill(COR_PRETO)  # fundo preto
     screen.blit(imagem_fundo, rect_imagem_fundo)  # imagem de fundo
+    if bool_tocar_musica:
+        screen.blit(botao_musica_on, rect_botao_musica)
+    else:
+        screen.blit(botao_musica_off, rect_botao_musica)
+
+    if bool_tocar_som:
+        screen.blit(botao_som_on, rect_botao_som)
+    else:
+        screen.blit(botao_som_off, rect_botao_som)
 
     if atualizar is not None:  # atualiza os peoes no cache
         for p in atualizar:
             _atualiza_peao(c, p)
 
+    if destacar is not None:  # destaca os peoes
+        for p in destacar:
+            dict_peoes[p][2] = True
+
     for p in dict_peoes:  # desenha todos os peoes.
         peao = dict_peoes[p]
-        if destacar is not None:  # tem que verificar se aquele peao eh destacavel
-            _desenha_peao(peao[0], peao[1], p in destacar)  # p in destacar eh true se ele deve ser destacado
-        else:
-            _desenha_peao(peao[0], peao[1])  # se nao, joga tudo como false
+        _desenha_peao(peao[0], peao[1], peao[2])
 
-    texto_exemplo_rect = texto_exemplo.get_rect()
-    texto_exemplo_rect.x, texto_exemplo_rect.y = 0, 0
-    screen.blit(texto_exemplo, texto_exemplo_rect)
+        if destacar is not None:
+            if p not in destacar:
+                dict_peoes[p][2] = False
+        elif not travar_destaque:
+            dict_peoes[p][2] = False
+
+    # texto_exemplo_rect = texto_exemplo.get_rect()
+    # texto_exemplo_rect.x, texto_exemplo_rect.y = 0, 0
+    # screen.blit(texto_exemplo, texto_exemplo_rect)
 
     pygame.display.flip()  # atualiza a tela
-    pygame.time.wait(500)  # espera 500ms
+    pygame.time.wait(100)  # espera 100ms
 
 
 def escolhe_peao(c, lista):
