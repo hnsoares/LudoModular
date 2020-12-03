@@ -67,6 +67,7 @@ rect_botao_som = None
 lista_chat = None   # cada elemento eh [frase, cor]
 
 imagens_peca = {}
+dict_peoes_multiplos = {}
 
 
 def inicializar(c):
@@ -210,10 +211,19 @@ def _monta_cache_peoes(c):
     return
 
 
-def _desenha_peao(cor, pos, destacar=False):
+def _desenha_destaque(pos):
+    x, y = dict_posicoes[pos]
+    x += 280
+    imagem_peca = imagens_peca['selecao']
+    rect_peao = imagem_peca.get_rect()
+    rect_peao.x, rect_peao.y = x - 1, y - 1
+    screen.blit(imagem_peca, rect_peao)
+    return
+
+
+def _desenha_peao(cor, pos):
     """
     Tenta desenhar um peao na tela.
-    Se destacar for True, o peao sera destacado
     Se nao conseguir desenhar, nao desenha.
     """
     if pos not in dict_posicoes:  # acha a posicao
@@ -228,17 +238,51 @@ def _desenha_peao(cor, pos, destacar=False):
     else:
         c = CORES[cor]
 
-    # pygame.draw.circle(screen, c, (x, y), RAIO_CIRCULO)
-    if destacar:
-        imagem_peca = imagens_peca['selecao']
+    # SOBREPOSICAO DE PEOES
+    if pos in dict_peoes_multiplos:
+        lista = dict_peoes_multiplos[pos]
+
+        quantidade_pecas = lista[0]
+        posicao_dentro = quantidade_pecas - len(lista) + 1  # 0 até (quantidade - 1)
+        cor = lista.pop(1)  # tira uma cor qualquer da lista.
+
+        # distribuir igualmente de (5,5) ate (28, 23)
+        pos_x = 23 // (quantidade_pecas - 1) * posicao_dentro + 5 + x
+        pos_y = 17 // (quantidade_pecas - 1) * posicao_dentro + 5 + y
+
+        imagem_peca = pygame.transform.scale(imagens_peca[cor], (15, 20))
         rect_peao = imagem_peca.get_rect()
-        rect_peao.x, rect_peao.y = x - 1, y - 1
+        rect_peao.x, rect_peao.y = pos_x, pos_y
+
+        screen.blit(imagem_peca, rect_peao)
+    # FIM DA SOBREPOSICAO DE PEOES
+
+    else:
+        imagem_peca = imagens_peca[cor]
+        rect_peao = imagem_peca.get_rect()
+        rect_peao.x, rect_peao.y = x + 10, y + 4
         screen.blit(imagem_peca, rect_peao)
 
-    imagem_peca = imagens_peca[cor]
-    rect_peao = imagem_peca.get_rect()
-    rect_peao.x, rect_peao.y = x + 10, y + 4
-    screen.blit(imagem_peca, rect_peao)
+
+def _monta_peoes_multiplos():
+    """Monta o dicionario com as posicoes, e os peoes que tem la (so se tiver mais de 1)"""
+    global dict_peoes_multiplos
+
+    dict_peoes_multiplos.clear()
+    dict_temp = {}
+    for p in dict_peoes:
+        cor = dict_peoes[p][0]
+        pos = dict_peoes[p][1]
+        if pos not in dict_temp:
+            dict_temp[pos] = [cor]
+        else:
+            dict_temp[pos].append(cor)
+
+    for d in dict_temp:
+        if len(dict_temp[d]) > 1:
+            dict_peoes_multiplos[d] = [len(dict_temp[d])] + dict_temp[d]   # [q, cor1, cor2, cor3...]
+
+    return
 
 
 def _atualiza_peao(c, i):
@@ -275,13 +319,20 @@ def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False, 
         for p in atualizar:
             _atualiza_peao(c, p)
 
-    if destacar is not None:  # destaca os peoes
+    if destacar is not None:  # prepara os peoes a serem destacados
         for p in destacar:
             dict_peoes[p][2] = True
 
-    for p in dict_peoes:  # desenha todos os peoes.
+    _monta_peoes_multiplos()  # cria o dicionario como peoes multiplos, pra o desenho usar
+
+    for p in dict_peoes:  # PRIMEIRA PASSAGEM (DESENHA OS DESTAQUES):
         peao = dict_peoes[p]
-        _desenha_peao(peao[0], peao[1], peao[2])
+        if peao[2]:
+            _desenha_destaque(peao[1])
+
+    for p in dict_peoes:  # SEGUNDA PASSAGEM (DESENHA OS PEOES):
+        peao = dict_peoes[p]
+        _desenha_peao(peao[0], peao[1])
 
         if destacar is not None:
             if p not in destacar:
