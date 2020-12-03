@@ -21,7 +21,6 @@ COR_PRETO = (0, 0, 0)
 COR_DEFAULT = (255, 255, 255)  # branco
 CORES = {'yellow': (255, 255, 0), 'red': (255, 0, 0), 'blue': (0, 0, 255), 'green': (0, 255, 0),
          'default': COR_DEFAULT, 'black': COR_PRETO}
-RAIO_CIRCULO = 24
 
 POS_BOTAO = 20, 20
 
@@ -87,24 +86,27 @@ def inicializar(c):
     global lista_chat
     global imagens_peca
 
-    # print("Iniciando pygame: ", end='')
+    print("Iniciando pygame: ", end='')
 
     pygame.init()
     screen = pygame.display.set_mode(TAMANHO_TELA)
     pygame.display.set_caption("Ludo")
 
     # MUSICA
+    print("Musica, ", end='')
     pygame.mixer.music.load(ARQUIVO_MUSICA)
     pygame.mixer.music.set_volume(0.01)
     pygame.mixer.music.play(loops=True, fade_ms=1000)
 
     # SOM
+    print("Som, ", end='')
     som_peca = pygame.mixer.Sound(ARQUIVO_SOM_PECA)
     som_captura = pygame.mixer.Sound(ARQUIVO_SOM_CAPTURA)
     som_vitoria = pygame.mixer.Sound(ARQUIVO_SOM_VITORIA)
     som_dado = pygame.mixer.Sound(ARQUIVO_SOM_DADO)
 
     # BOTOES
+    print("Botoes, ", end='')
     botao_musica_on = pygame.image.load(ARQUIVO_BOTAO_MUSICA_ON)
     rect_botao_musica = botao_musica_on.get_rect()
     rect_botao_musica.x, rect_botao_musica.y = POS_BOTAO
@@ -116,6 +118,7 @@ def inicializar(c):
     botao_som_off = pygame.image.load(ARQUIVO_BOTAO_SOM_OFF)
 
     # FUNDO
+    print("Fundo, ", end='')
     imagem_fundo = pygame.image.load(ARQUIVO_FUNDO)
     rect_imagem_fundo = imagem_fundo.get_rect()
     rect_imagem_fundo.x = 0
@@ -123,6 +126,7 @@ def inicializar(c):
     rect_imagem_fundo.y = 0
 
     # POSICOES
+    print("Posicoes, ", end='')
     with open(ARQUIVO_POSICOES, 'r') as f:
         # o arquivo esta como 'str': [int, int]. Mas eu quero int: [int, int]
         # por isso, vou converter para inteiro todas as chaves
@@ -136,16 +140,21 @@ def inicializar(c):
     # print("DONE")
 
     # TEXTOS
+    print("Textos, ", end='')
     font_texto = pygame.font.SysFont('bahnschrift.ttf', 34, bold=False)
     lista_chat = list()
     lista_chat.append(("Bem vindo ao Ludo!", 'default'))
 
     # pecas
+    print("Pecas, ", end='')
     imagens_peca['red'] = pygame.image.load(ARQUIVO_PECA_VERMELHO)
     imagens_peca['green'] = pygame.image.load(ARQUIVO_PECA_VERDE)
     imagens_peca['blue'] = pygame.image.load(ARQUIVO_PECA_AZUL)
     imagens_peca['yellow'] = pygame.image.load(ARQUIVO_PECA_AMARELO)
     imagens_peca['selecao'] = pygame.image.load(ARQUIVO_PECA_SELECAO)
+
+    print("FINALIZADO.")
+    return
 
 
 def _checa_eventos():
@@ -213,8 +222,6 @@ def _desenha_peao(cor, pos, destacar=False):
 
     x, y = dict_posicoes[pos]
     x += 280
-    # x -= 20
-    # y -= 20
 
     if cor not in CORES:
         c = COR_DEFAULT
@@ -225,12 +232,12 @@ def _desenha_peao(cor, pos, destacar=False):
     if destacar:
         imagem_peca = imagens_peca['selecao']
         rect_peao = imagem_peca.get_rect()
-        rect_peao.x, rect_peao.y = x, y
+        rect_peao.x, rect_peao.y = x - 1, y - 1
         screen.blit(imagem_peca, rect_peao)
 
     imagem_peca = imagens_peca[cor]
     rect_peao = imagem_peca.get_rect()
-    rect_peao.x, rect_peao.y = x, y
+    rect_peao.x, rect_peao.y = x + 10, y + 4
     screen.blit(imagem_peca, rect_peao)
 
 
@@ -284,7 +291,7 @@ def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False, 
 
     if chat is not None:
         lista_chat.insert(0, chat)
-        if len(lista_chat) == 16:
+        if len(lista_chat) == 15:
             lista_chat.pop()
 
     for i, (frase, cor) in enumerate(lista_chat):
@@ -310,10 +317,7 @@ def escolhe_peao(c, lista):
             for i, pos1 in enumerate(posicoes_lista):
                 x1, y1 = pos1  # posicao do peao
                 x1 += 280  # offset do canto da tela (deve ser corrigido se alterar as posicoes
-                dist = (x - x1) ** 2 + (
-                            y - y1) ** 2  # distancia do clique do mouse deve ser menor que o raio do circulo
-                # print(dist, x, y, x1, y1)
-                if dist <= RAIO_CIRCULO ** 2:
+                if x1 <= x <= x1 + 48 and y1 <= y <= y1 + 48:
                     return i
 
 
