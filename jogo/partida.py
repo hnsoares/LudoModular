@@ -122,7 +122,7 @@ def _rodada(cor):
     if posicao_final == -2:
         if peoes_finalizados == 3:  # ja tinha acabado tres e acabou outro agora
             return 2
-        GUIJogo.atualiza_tela(travar_destaque=True, chat=("Seu peão chegou na casa final!", cor))
+        GUIJogo.atualiza_tela(travar_destaque=True, chat=("Peãp finalizado!", cor))
         print("Voce chegou ate o final com seu peao!")
         return 3  # pode jogar de novo
 
@@ -167,13 +167,12 @@ def _rodar_partida(dados):
             GUIJogo.toca_som(3)
             print("Voce ganhou!")
             GUIJogo.atualiza_tela(chat=("Voce ganhou!", cor))
-            continue  # a cor nao volta pra lista de cores
-        if x == 1:
+            # continue  # a cor nao volta pra lista de cores
+        elif x == 1:
             GUIJogo.atualiza_tela(chat=("Não há movimentos", cor))
             print("Voce nao pode realizar nenhum movimento.")
 
-        print("Rodada finalizada.\n")
-        if x == 3:
+        elif x == 3:
             GUIJogo.atualiza_tela(chat=("Jogue novamente", cor))
             GUIJogo.toca_som(2)
             cores.insert(0, cor)
