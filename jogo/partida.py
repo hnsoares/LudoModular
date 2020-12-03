@@ -172,7 +172,7 @@ def _rodar_partida(dados):
             GUIJogo.atualiza_tela(chat=("Não há movimentos", cor))
             print("Voce nao pode realizar nenhum movimento.")
 
-        elif x == 3:
+        if x == 3:
             GUIJogo.atualiza_tela(chat=("Jogue novamente", cor))
             GUIJogo.toca_som(2)
             cores.insert(0, cor)
