@@ -204,7 +204,10 @@ def recupera_partida_completa(c):
     for dado in dados:
         # print(dado.tag, dado.attrib['tipo'], dado.text)
         if dado.attrib['tipo'] == 'list':
-            dicionario_dados[dado.tag] = [_converte_objeto(x, dado.attrib['subtipo']) for x in dado.text.split(",")]
+            if dado.text is None:
+                dicionario_dados[dado.tag] = []
+            else:
+                dicionario_dados[dado.tag] = [_converte_objeto(x, dado.attrib['subtipo']) for x in dado.text.split(",")]
         else:
             dicionario_dados[dado.tag] = _converte_objeto(dado.text, dado.attrib['tipo'])
 

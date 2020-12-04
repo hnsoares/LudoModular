@@ -15,6 +15,7 @@ import pygame
 from os import sep, path  # para achar arquivos
 from dados import baseDados
 from json import load
+from time import time  # para contagem do tempo
 
 TAMANHO_TELA = COMPRIMENTO_TELA, ALTURA_TELA = (1280, 720)  # por enquanto, se trocar, da ruim
 COR_PRETO = (0, 0, 0)
@@ -413,10 +414,17 @@ def espera_tempo(ms):
     pygame.time.wait(ms)  # espera ms
 
 
-def exibe_tela_final_e_fecha():
+def exibe_tela_final_e_fecha(vencedores):
     """Exibe tela de vitoria e fecha o jogo depois de 10 segundos."""
     atualiza_tela(chat=("Jogo encerrado!", 'default'))
-    for i in range(10, 0, -1):
-        atualiza_tela(chat=("Fechando em %ds" % i, 'default'))
-        espera_tempo(1000)
+    atualiza_tela(chat=("Ranking", 'default'))
+    for i, vencedor in enumerate(vencedores):
+        atualiza_tela(chat=("%d°: %s" % (i + 1, vencedor), vencedor))  # imprime os vencedores
+
+    atualiza_tela(chat=('', 'default'))
+    atualiza_tela(chat=("Fechando em 10s", 'default'))
+    t = time()
+    while time() - t <= 10:  # loop de 10 segundos
+        _checa_eventos()
+
     fechar()
