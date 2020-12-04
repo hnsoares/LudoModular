@@ -41,7 +41,13 @@ ARQUIVO_PECA_AZUL = sep.join([path.dirname(path.abspath(__file__)), '..', 'asset
 ARQUIVO_PECA_VERMELHO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca_vermelho.png'])
 ARQUIVO_PECA_AMARELO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca_amarelo.png'])
 ARQUIVO_PECA_SELECAO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'selecao.png'])
-
+ARQUIVO_DADO_1 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado1.png'])
+ARQUIVO_DADO_2 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado2.png'])
+ARQUIVO_DADO_3 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado3.png'])
+ARQUIVO_DADO_4 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado4.png'])
+ARQUIVO_DADO_5 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado5.png'])
+ARQUIVO_DADO_6 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado6.png'])
+ARQUIVO_DADO_0 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado0.png'])
 
 screen = None  # tela a ser configurada
 imagem_fundo = None  # imagem de fundo que vai ser carregada
@@ -70,6 +76,9 @@ lista_chat = None   # cada elemento eh [frase, cor]
 imagens_peca = {}
 dict_peoes_multiplos = {}
 
+imagens_dado = {}
+valor_dado_anterior = 6
+
 
 def inicializar(c):
     """
@@ -86,7 +95,7 @@ def inicializar(c):
     global botao_musica_on, rect_botao_musica, botao_musica_off
     global botao_som_on, botao_som_off, rect_botao_som
     global lista_chat
-    global imagens_peca
+    global imagens_peca, imagens_dado
 
     print("Iniciando pygame: ", end='')
 
@@ -155,7 +164,17 @@ def inicializar(c):
     imagens_peca['yellow'] = pygame.image.load(ARQUIVO_PECA_AMARELO)
     imagens_peca['selecao'] = pygame.image.load(ARQUIVO_PECA_SELECAO)
 
-    print("FINALIZADO.")
+    # DADOS
+    print("Dados, ", end='')
+    imagens_dado[1] = pygame.image.load(ARQUIVO_DADO_1)
+    imagens_dado[2] = pygame.image.load(ARQUIVO_DADO_2)
+    imagens_dado[3] = pygame.image.load(ARQUIVO_DADO_3)
+    imagens_dado[4] = pygame.image.load(ARQUIVO_DADO_4)
+    imagens_dado[5] = pygame.image.load(ARQUIVO_DADO_5)
+    imagens_dado[6] = pygame.image.load(ARQUIVO_DADO_6)
+    imagens_dado[0] = pygame.image.load(ARQUIVO_DADO_0)
+
+    print("\nFINALIZADO.")
     return
 
 
@@ -209,6 +228,14 @@ def _monta_cache_peoes(c):
         dict_peoes[int(f['id'])] = [f['cor'], int(f['pos']), False]  # dicionario para o cache interno
         # o terceiro termo diz se o peao esta destacado ou nao
     cursor.close()
+    return
+
+
+def _desenha_dado(valor):
+    imagem = imagens_dado[valor]
+    rect_dado = imagem.get_rect()
+    rect_dado.x, rect_dado.y = 152, 593
+    screen.blit(imagem, rect_dado)
     return
 
 
@@ -292,7 +319,7 @@ def _atualiza_peao(c, i):
     dict_peoes[i][1] = p['pos']
 
 
-def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False, chat=None):
+def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False, chat=None, dado=None):
     """
     Atualiza a tela da interface do jogo.
     Se atualizar for uma lista de ids:
@@ -302,7 +329,7 @@ def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False, 
         Esses peoes serao destacados.
     Se travar_destaque, os destaques nao seram excluidos
     """
-    global lista_chat
+    global lista_chat, valor_dado_anterior
 
     # screen.fill(COR_PRETO)  # fundo preto
     screen.blit(imagem_fundo, rect_imagem_fundo)  # imagem de fundo
@@ -315,6 +342,10 @@ def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False, 
         screen.blit(botao_som_on, rect_botao_som)
     else:
         screen.blit(botao_som_off, rect_botao_som)
+
+    if dado is not None:
+        valor_dado_anterior = dado
+    _desenha_dado(valor_dado_anterior)
 
     if atualizar is not None:  # atualiza os peoes no cache
         for p in atualizar:
@@ -371,6 +402,16 @@ def escolhe_peao(c, lista):
                 x1 += 280  # offset do canto da tela (deve ser corrigido se alterar as posicoes
                 if x1 <= x <= x1 + 48 and y1 <= y <= y1 + 48:
                     return i
+
+
+def roda_dado():
+    """Espera ele clicar no dado"""
+    while True:
+        pos = _checa_eventos()
+        if pos is not None:  # o mouse foi clicado
+            x, y = pos
+            if 152 <= x <= 252 and 593 <= y <= 693:
+                return
 
 
 def toca_som(som):

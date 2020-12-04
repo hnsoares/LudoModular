@@ -75,11 +75,13 @@ def _rodada(cor):
     peoes_atualizar_grafico.clear()
     jogar_novamente = False
     # rodando dado
+    GUIJogo.atualiza_tela(chat=('Jogue o dado', cor), dado=0)
+    GUIJogo.roda_dado()
     valor_dado = dado.jogar_dado()
     if valor_dado == 6:
         jogar_novamente = True
     print("Rodei o dado: %d" % valor_dado)
-    GUIJogo.atualiza_tela(travar_destaque=True, chat=('Rodei o dado: %d' % valor_dado, cor))
+    GUIJogo.atualiza_tela(chat=('Rodei o dado: %d' % valor_dado, cor), dado=valor_dado)
     GUIJogo.toca_som(1)
 
     # descobrindo os valores possiveis
