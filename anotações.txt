@@ -1,0 +1,2 @@
+Trocar roda_partida (while True na main)
+
