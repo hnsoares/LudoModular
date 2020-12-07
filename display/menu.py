@@ -122,9 +122,11 @@ def cria_menu():
     canvas.pack()
     canvas.create_image(20,10, anchor=NW, image=logo)
 
-    texto_num_jogadores = Label(root, text='Escolha o número de jogadores: ', background='grey', font=('Arial','15','bold'))
+    texto_num_jogadores = Label(root, text='Escolha o número de jogadores: ', background='grey',
+                                font=('Arial','15','bold'))
 
-    combo = Combobox(root, width=29, state="readonly")
+
+    combo = Combobox(root, width=15, state="readonly", font=('Arial','12','bold'))
     combo['values'] = (2, 3, 4)  # define as escolhas
     combo.current(0)  # deixa a escolha default com o texto
     carregar_button = Button(root, text="Carregar Partida", command=lambda: chama_partida_salva(root), width=20)
@@ -141,7 +143,7 @@ def cria_menu():
     texto_num_jogadores.place(x=WIDTH / 2 - 145, y=HEIGHT * 5 / 7 - 75)
     iniciar_button.place(x=WIDTH / 2 - 70, y=HEIGHT * 5 / 7)
     carregar_button.place(x=WIDTH / 2 - 70, y=HEIGHT * 5 / 7 + 40)
-    combo.place(x=WIDTH / 2 - 100, y=HEIGHT * 5 / 7 - 40)
+    combo.place(x=WIDTH / 2 - 85, y=HEIGHT * 5 / 7 - 40)
     #credenciais_bd.place(x=WIDTH / 2 - 70, y=HEIGHT * 2 / 7 - 100)
     root.config(menu=credenciais_bd)
     root.mainloop()
