@@ -6,6 +6,10 @@ Funcoes:
     detecta_partida_completa()
     recupera_partida_completa(c)
     salva_partida_completa(c, [dados])
+    exclui_partida_completa()
+    recupera_estatisticas()
+    salva_estatisticas(dados)
+    atualiza_estatisticas(nome, info, soma)
 
 Feita por Daniel
 """
@@ -13,10 +17,11 @@ Feita por Daniel
 from dados import baseDados
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from os import path, sep  # so para o armazenamento funcionar e para remover uma partida salva
+from os import path, sep, remove  # so para o armazenamento funcionar e para remover uma partida salva
 
 PATH = path.dirname(path.abspath(__file__)) + sep + 'arquivos' + sep
 ARQUIVO_PARTIDA = 'partida.xml'
+ARQUIVO_ESTATISTICAS = 'estatisticas.xml'
 
 
 def _converte_objeto(o, tipo):
@@ -212,3 +217,74 @@ def recupera_partida_completa(c):
             dicionario_dados[dado.tag] = _converte_objeto(dado.text, dado.attrib['tipo'])
 
     return dicionario_dados
+
+
+def exclui_partida_completa():
+    """Deleta o arquivo da partida."""
+    nome_arquivo = PATH + ARQUIVO_PARTIDA
+    remove(nome_arquivo)
+    return
+
+
+def recupera_estatisticas():
+    """Retorna um dicionario com as estatisticas"""
+    nome_arquivo = PATH + ARQUIVO_ESTATISTICAS
+    dados = {}
+    try:
+        with open(nome_arquivo, 'r') as f:
+            tree = ET.parse(f)
+            root = tree.getroot()
+
+    except FileNotFoundError:
+        return dados   # nao tem nenhuma estatistica salva
+
+    estatisticas = root.find('estatisticas')
+    for e in estatisticas:
+        dados[e.tag] = _converte_objeto(e.text, e.attrib['tipo'])
+
+    return dados
+
+
+def salva_estatisticas(dados):
+    """
+    Salva as estatisticas.
+    Recebe um dicionario <string> -> <int, float, str>
+    Retorna 0
+    """
+
+    root = ET.Element('estatisticas')
+    for d in dados:
+        if type(dados[d]) not in [str, int, float]:
+            print("Nao consegui armazenar a estatistica:", d, dados[d])
+        else:
+            elemento_dado = ET.SubElement(root, d)
+            elemento_dado.text = str(dados[d])
+            elemento_dado.set('tipo', str(type(dados[d]).__name__))
+
+    saida = _formata_xml(root)  # copia dos slides 15
+    with open(PATH + ARQUIVO_ESTATISTICAS, "w+") as f:
+        f.write(saida)
+
+    return 0
+
+
+def atualiza_estatistias(nome, info, soma=False):
+    """
+    Atualiza uma das estatisticas
+    Recebe um nome da estatistica, a informacao a ser guardada
+    soma=True se quiser que a estatistica seja somada, e nao sobrescrita/escrita
+    Retorna 0 no sucesso, 1 se nao foi possivel somar
+    """
+
+    est = recupera_estatisticas()
+    if soma:
+        try:
+            est[nome] += info
+        except Exception as e:
+            print('Erro ao somar: ', e)
+            return 1
+    else:
+        est[nome] = info
+
+    salva_estatisticas(est)
+    return 0
