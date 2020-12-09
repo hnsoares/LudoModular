@@ -30,6 +30,7 @@ FORMATO = "%sx%s" % (WIDTH, HEIGHT)
 
 ARQUIVO_LOGO_LUDO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'logo_ludo.png'])
 
+
 def alterar_crendenciais_bd(root):
     def coletar_e_salvar():
         lista = [e1.get(), e2.get(), e3.get()]
@@ -118,11 +119,12 @@ def cria_menu():
 
     logo = PhotoImage(file=ARQUIVO_LOGO_LUDO)
 
-    canvas = Canvas(root, width=350,height=160, background='grey', highlightthickness=0)
+    canvas = Canvas(root, width=350, height=160, background='grey', highlightthickness=0)
     canvas.pack()
-    canvas.create_image(20,10, anchor=NW, image=logo)
+    canvas.create_image(20, 10, anchor=NW, image=logo)
 
-    texto_num_jogadores = Label(root, text='Escolha o número de jogadores: ', background='grey', font=('Arial','15','bold'))
+    texto_num_jogadores = Label(root, text='Escolha o número de jogadores: ', background='grey',
+                                font=('Arial', '15', 'bold'))
 
     combo = Combobox(root, width=29, state="readonly")
     combo['values'] = (2, 3, 4)  # define as escolhas
@@ -131,17 +133,21 @@ def cria_menu():
     iniciar_button = Button(root, text='Iniciar Partida',
                             command=lambda: chama_partida_nova(root, combo.get()), width=20)
 
-
-    #credenciais_bd = Button(root, text="Configurar credenciais",
-    #command= lambda: alterar_crendenciais_bd(root), width=20)
+    # credenciais_bd = Button(root, text="Configurar credenciais",
+    # command= lambda: alterar_crendenciais_bd(root), width=20)
 
     credenciais_bd = Menu(root)
-    credenciais_bd.add_cascade(label='Configurar credenciais', command= lambda: alterar_crendenciais_bd(root))
+    credenciais_bd.add_cascade(label='Configurar credenciais', command=lambda: alterar_crendenciais_bd(root))
+
+    estatisticas = AD.recupera_estatisticas()  # dicionario com 'tempo' (seg) e 'partidas' (int)
+    if estatisticas is not None:
+        for e in estatisticas:
+            print(e, estatisticas[e])
 
     texto_num_jogadores.place(x=WIDTH / 2 - 145, y=HEIGHT * 5 / 7 - 75)
     iniciar_button.place(x=WIDTH / 2 - 70, y=HEIGHT * 5 / 7)
     carregar_button.place(x=WIDTH / 2 - 70, y=HEIGHT * 5 / 7 + 40)
     combo.place(x=WIDTH / 2 - 100, y=HEIGHT * 5 / 7 - 40)
-    #credenciais_bd.place(x=WIDTH / 2 - 70, y=HEIGHT * 2 / 7 - 100)
+    # credenciais_bd.place(x=WIDTH / 2 - 70, y=HEIGHT * 2 / 7 - 100)
     root.config(menu=credenciais_bd)
     root.mainloop()

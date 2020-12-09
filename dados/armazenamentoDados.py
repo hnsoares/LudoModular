@@ -233,12 +233,11 @@ def recupera_estatisticas():
     try:
         with open(nome_arquivo, 'r') as f:
             tree = ET.parse(f)
-            root = tree.getroot()
+            estatisticas = tree.getroot()
 
     except FileNotFoundError:
         return dados   # nao tem nenhuma estatistica salva
 
-    estatisticas = root.find('estatisticas')
     for e in estatisticas:
         dados[e.tag] = _converte_objeto(e.text, e.attrib['tipo'])
 
@@ -273,16 +272,15 @@ def atualiza_estatistias(nome, info, soma=False):
     Atualiza uma das estatisticas
     Recebe um nome da estatistica, a informacao a ser guardada
     soma=True se quiser que a estatistica seja somada, e nao sobrescrita/escrita
-    Retorna 0 no sucesso, 1 se nao foi possivel somar
+        Se nao houver esta estatistica, ela sera criada
     """
 
     est = recupera_estatisticas()
     if soma:
-        try:
+        if nome in est:
             est[nome] += info
-        except Exception as e:
-            print('Erro ao somar: ', e)
-            return 1
+        else:
+            est[nome] = info
     else:
         est[nome] = info
 

@@ -41,6 +41,8 @@ def _criar_partida(cores):
              'jogadores': len(cores),
              'vencedores': []}
 
+    armazenamentoDados.atualiza_estatistias('partidas', 1, soma=True)  # adiciona mais uma partida nas estatisticas
+
     return dados
 
 
@@ -188,10 +190,12 @@ def _rodar_partida(dados):
 
         GUIJogo.atualiza_tela(c=conexao_bd, atualizar=peoes_atualizar_grafico, chat=("", cor))  # para pular uma linha
 
-        tempo_decorrido = (datetime.datetime.now() - hora_inicial).total_seconds() + tempo_decorrido_inicial
-        dados['tempo'] = "%d:%d" % (tempo_decorrido // 60, tempo_decorrido % 60)
+        tempo_decorrido = (datetime.datetime.now() - hora_inicial).total_seconds()
+        tempo_total = tempo_decorrido + tempo_decorrido_inicial
+        dados['tempo'] = "%d:%d" % (tempo_total // 60, tempo_total % 60)
 
         armazenamentoDados.salvar_partida_completa(conexao_bd, dados)
+        armazenamentoDados.atualiza_estatistias('tempo', tempo_decorrido, soma=True)
 
         GUIJogo.espera_tempo(500)  # atrasa um pouco a proxima rodada
 

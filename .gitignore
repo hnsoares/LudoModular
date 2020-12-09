@@ -1,5 +1,9 @@
 .idea/
 venv/
 pycache/
+dados/__pycache__/
+display/__pycache__/
+jogo/__pycache__/
 dados/arquivos/credenciais.txt
 dados/arquivos/partida.xml
+dados/arquivos/estatisticas.xml
