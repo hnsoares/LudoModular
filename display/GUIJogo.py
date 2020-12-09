@@ -107,7 +107,7 @@ def inicializar(c):
     print("Musica, ", end='')
     pygame.mixer.music.load(ARQUIVO_MUSICA)
     pygame.mixer.music.set_volume(0.01)
-    pygame.mixer.music.play(loops=True, fade_ms=1000)
+    pygame.mixer.music.play(loops=-1, fade_ms=1000)
 
     # SOM
     print("Som, ", end='')
