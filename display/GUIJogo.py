@@ -24,30 +24,31 @@ CORES = {'yellow': (255, 255, 0), 'red': (255, 0, 0), 'blue': (0, 0, 255), 'gree
          'default': COR_DEFAULT, 'black': COR_PRETO}
 
 POS_BOTAO = 20, 20
-
-ARQUIVO_MUSICA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'musica.ogg'])
-ARQUIVO_FUNDO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'tabuleiro720_2.png'])
-ARQUIVO_POSICOES = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'posicoes.json'])
-ARQUIVO_SOM_PECA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca.wav'])
-ARQUIVO_SOM_CAPTURA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'captura.wav'])
-ARQUIVO_SOM_VITORIA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'vitoria.wav'])
-ARQUIVO_SOM_DADO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado.wav'])
-ARQUIVO_BOTAO_MUSICA_ON = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'bmusica_on.png'])
-ARQUIVO_BOTAO_MUSICA_OFF = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'bmusica_off.png'])
-ARQUIVO_BOTAO_SOM_ON = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'bsom_on.png'])
-ARQUIVO_BOTAO_SOM_OFF = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'bsom_off.png'])
-ARQUIVO_PECA_VERDE = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca_verde.png'])
-ARQUIVO_PECA_AZUL = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca_azul.png'])
-ARQUIVO_PECA_VERMELHO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca_vermelho.png'])
-ARQUIVO_PECA_AMARELO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'peca_amarelo.png'])
-ARQUIVO_PECA_SELECAO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'selecao.png'])
-ARQUIVO_DADO_1 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado1.png'])
-ARQUIVO_DADO_2 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado2.png'])
-ARQUIVO_DADO_3 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado3.png'])
-ARQUIVO_DADO_4 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado4.png'])
-ARQUIVO_DADO_5 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado5.png'])
-ARQUIVO_DADO_6 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado6.png'])
-ARQUIVO_DADO_0 = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'dado0.png'])
+LOCAL_ARQUIVOS = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', ''])
+ARQUIVO_MUSICA = LOCAL_ARQUIVOS + 'musica.ogg'
+ARQUIVO_FUNDO = LOCAL_ARQUIVOS + 'tabuleiro720_2.png'
+ARQUIVO_POSICOES = LOCAL_ARQUIVOS + 'posicoes.json'
+ARQUIVO_SOM_PECA = LOCAL_ARQUIVOS + 'peca.wav'
+ARQUIVO_SOM_CAPTURA = LOCAL_ARQUIVOS + 'captura.wav'
+ARQUIVO_SOM_VITORIA = LOCAL_ARQUIVOS + 'vitoria.wav'
+ARQUIVO_SOM_DADO = LOCAL_ARQUIVOS + 'dado.wav'
+ARQUIVO_BOTAO_MUSICA_ON = LOCAL_ARQUIVOS + 'bmusica_on.png'
+ARQUIVO_BOTAO_MUSICA_OFF = LOCAL_ARQUIVOS + 'bmusica_off.png'
+ARQUIVO_BOTAO_SOM_ON = LOCAL_ARQUIVOS + 'bsom_on.png'
+ARQUIVO_BOTAO_SOM_OFF = LOCAL_ARQUIVOS + 'bsom_off.png'
+ARQUIVO_PECA_VERDE = LOCAL_ARQUIVOS + 'peca_verde.png'
+ARQUIVO_PECA_AZUL = LOCAL_ARQUIVOS + 'peca_azul.png'
+ARQUIVO_PECA_VERMELHO = LOCAL_ARQUIVOS + 'peca_vermelho.png'
+ARQUIVO_PECA_AMARELO = LOCAL_ARQUIVOS + 'peca_amarelo.png'
+ARQUIVO_PECA_SELECAO = LOCAL_ARQUIVOS + 'selecao.png'
+ARQUIVO_DADO_1 = LOCAL_ARQUIVOS + 'dado1.png'
+ARQUIVO_DADO_2 = LOCAL_ARQUIVOS + 'dado2.png'
+ARQUIVO_DADO_3 = LOCAL_ARQUIVOS + 'dado3.png'
+ARQUIVO_DADO_4 = LOCAL_ARQUIVOS + 'dado4.png'
+ARQUIVO_DADO_5 = LOCAL_ARQUIVOS + 'dado5.png'
+ARQUIVO_DADO_6 = LOCAL_ARQUIVOS + 'dado6.png'
+ARQUIVO_DADO_0 = LOCAL_ARQUIVOS + 'dado0.png'
+ARQUIVO_LOGO = LOCAL_ARQUIVOS + 'logo_ludo.png'
 
 screen = None  # tela a ser configurada
 imagem_fundo = None  # imagem de fundo que vai ser carregada
@@ -173,6 +174,11 @@ def inicializar(c):
     imagens_dado[5] = pygame.image.load(ARQUIVO_DADO_5)
     imagens_dado[6] = pygame.image.load(ARQUIVO_DADO_6)
     imagens_dado[0] = pygame.image.load(ARQUIVO_DADO_0)
+
+    # LOGO
+    print("Logo, ", end='')
+    imagem_logo = pygame.transform.scale(pygame.image.load(ARQUIVO_LOGO), (32, 32))
+    pygame.display.set_icon(imagem_logo)
 
     print("\nFINALIZADO.")
     return

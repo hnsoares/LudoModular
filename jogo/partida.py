@@ -197,6 +197,7 @@ def _rodar_partida(dados):
 
     # acabou aqui
     GUIJogo.exibe_tela_final_e_fecha(dados['vencedores'])
+    armazenamentoDados.exclui_partida_completa()
 
     return 0
 
