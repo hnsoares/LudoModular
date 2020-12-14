@@ -38,7 +38,8 @@ def _criar_partida(cores):
     dados = {'hora_criacao': datetime.datetime.now().isoformat(),
              'tempo': '0:0',
              'cores': cores,
-             'jogadores': len(cores)}
+             'jogadores': len(cores),
+             'vencedores': []}
 
     return dados
 
@@ -74,10 +75,13 @@ def _rodada(cor):
     peoes_atualizar_grafico.clear()
     jogar_novamente = False
     # rodando dado
+    GUIJogo.atualiza_tela(chat=('Jogue o dado', cor), dado=0)
+    GUIJogo.roda_dado()
     valor_dado = dado.jogar_dado()
     if valor_dado == 6:
         jogar_novamente = True
     print("Rodei o dado: %d" % valor_dado)
+    GUIJogo.atualiza_tela(chat=('Rodei o dado: %d' % valor_dado, cor), dado=valor_dado)
     GUIJogo.toca_som(1)
 
     # descobrindo os valores possiveis
@@ -100,6 +104,7 @@ def _rodada(cor):
         return 2  # se o cara ja tiver ganhado, manda que ja ganhou, por garantia
 
     print("Movimentos possiveis: %d" % len(lista_peoes_possiveis))
+    # GUIJogo.atualiza_tela(travar_destaque=True, chat=("Movimentos possiveis: %d" % len(lista_peoes_possiveis), cor))
     if not lista_peoes_possiveis:
         return 1 if not jogar_novamente else 3
 
@@ -118,12 +123,14 @@ def _rodada(cor):
         raise Exception("IdNaoExiste2")
 
     if posicao_final == -2:
-        if peoes_finalizados == 3:  # ja tinha acabado tres e acabou outro agora
+        if peoes_finalizados >= 3:  # ja tinha acabado tres e acabou outro agora
             return 2
+        GUIJogo.atualiza_tela(chat=("Peão finalizado!", cor))
         print("Voce chegou ate o final com seu peao!")
         return 3  # pode jogar de novo
 
     print("Peao movido para a posicao %d" % posicao_final)
+    GUIJogo.atualiza_tela(chat=("Peão movido", cor))
 
     # verificar peao comido
     lista_peoes_posicao = tabuleiro.acessar_posicao(conexao_bd, posicao_final)
@@ -136,6 +143,7 @@ def _rodada(cor):
             continue
         else:
             print("Peao comido: %d" % p)
+            GUIJogo.atualiza_tela(chat=("Peão capturado!", cor))
             tabuleiro.reiniciar_peao(conexao_bd, p)  # comeu o peao
             peoes_atualizar_grafico.append(p)
             jogar_novamente = True
@@ -156,27 +164,40 @@ def _rodar_partida(dados):
     while cores:
         cor = cores.pop(0)
         print("Vez do %s" % cor)
-        GUIJogo.atualiza_tela(conexao_bd, peoes_atualizar_grafico)
+        GUIJogo.atualiza_tela(conexao_bd, chat=("Vez do %s" % cor, cor))
         x = _rodada(cor)
         if x == 2:
             GUIJogo.toca_som(3)
             print("Voce ganhou!")
-            continue  # a cor nao volta pra lista de cores
-        if x == 1:
-            print("Voce nao pode realizar nenhum movimento.")
+            GUIJogo.atualiza_tela(chat=("Voce ganhou!", cor))
+            # continue  # a cor nao volta pra lista de cores
+            dados['vencedores'].append(cor)  # salva a cor vencedora nos dados
 
-        print("Rodada finalizada.\n")
-        if x == 3:
+        elif x == 3:
+            GUIJogo.atualiza_tela(chat=("Jogue novamente", cor))
             GUIJogo.toca_som(2)
             cores.insert(0, cor)
         else:
-            GUIJogo.toca_som(0)
+            if x == 1:
+                GUIJogo.atualiza_tela(chat=("Não há movimentos", cor))
+                print("Voce nao pode realizar nenhum movimento.")
+            else:
+                GUIJogo.toca_som(0)
+            GUIJogo.atualiza_tela(chat=("Rodada finalizada", cor))
             cores.append(cor)
+
+        GUIJogo.atualiza_tela(c=conexao_bd, atualizar=peoes_atualizar_grafico, chat=("", cor))  # para pular uma linha
 
         tempo_decorrido = (datetime.datetime.now() - hora_inicial).total_seconds() + tempo_decorrido_inicial
         dados['tempo'] = "%d:%d" % (tempo_decorrido // 60, tempo_decorrido % 60)
 
         armazenamentoDados.salvar_partida_completa(conexao_bd, dados)
+
+        GUIJogo.espera_tempo(500)  # atrasa um pouco a proxima rodada
+
+    # acabou aqui
+    GUIJogo.exibe_tela_final_e_fecha(dados['vencedores'])
+    armazenamentoDados.exclui_partida_completa()
 
     return 0
 
