@@ -7,6 +7,9 @@ Funcoes:
     escolhe_peao(c, lista)
     atualiza_tela(c, [peoes], [destacar])
     fechar()
+    tocar_som(som)
+    espera_tempo(ms)
+    exibe_final_e_fecha(vencedores)
 
 Feita por Daniel
 """
@@ -22,8 +25,9 @@ COR_PRETO = (0, 0, 0)
 COR_DEFAULT = (255, 255, 255)  # branco
 CORES = {'yellow': (255, 255, 0), 'red': (255, 0, 0), 'blue': (0, 0, 255), 'green': (0, 255, 0),
          'default': COR_DEFAULT, 'black': COR_PRETO}
-
 POS_BOTAO = 20, 20
+
+# PATHS DE ARQUIVOS A SEREM UTILIZADOS
 LOCAL_ARQUIVOS = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', ''])
 ARQUIVO_MUSICA = LOCAL_ARQUIVOS + 'musica.ogg'
 ARQUIVO_FUNDO = LOCAL_ARQUIVOS + 'tabuleiro720_2.png'
@@ -50,6 +54,8 @@ ARQUIVO_DADO_6 = LOCAL_ARQUIVOS + 'dado6.png'
 ARQUIVO_DADO_0 = LOCAL_ARQUIVOS + 'dado0.png'
 ARQUIVO_LOGO = LOCAL_ARQUIVOS + 'logo_ludo.png'
 
+# VARIAVEIS GLOBAIS A SEREM INICIALIZADAS
+
 screen = None  # tela a ser configurada
 imagem_fundo = None  # imagem de fundo que vai ser carregada
 rect_imagem_fundo = None  # objeto da image de fundo que vai ser carregada
@@ -58,13 +64,13 @@ dict_posicoes = None  # dicionario para posicoes (gerado no inicializar)
 
 font_texto = None
 
-bool_tocar_som = True
+bool_tocar_som = True   # se pode tocar som ou nao
 som_peca = None
 som_captura = None
 som_vitoria = None
 som_dado = None
 
-bool_tocar_musica = True
+bool_tocar_musica = True  # se pode tocar musica ou nao
 botao_musica_on = None
 botao_musica_off = None
 rect_botao_musica = None
@@ -78,7 +84,7 @@ imagens_peca = {}
 dict_peoes_multiplos = {}
 
 imagens_dado = {}
-valor_dado_anterior = 6
+valor_dado_anterior = 6  # tanto faz
 
 
 def inicializar(c):
@@ -145,11 +151,8 @@ def inicializar(c):
         # lambda vai ser uma funcao que recebe o dic, e retorna faz um dict comprehension
         # que pega a chave, transforma em int, e atribui ao conteudo, pego atraves de dict.items()
         dict_posicoes = load(f, object_hook=lambda d: {int(a): b for a, b in d.items()})
-    # print("DONE")
 
-    # print("Carrengando peoes: ", end="")
     _monta_cache_peoes(c)
-    # print("DONE")
 
     # TEXTOS
     print("Textos, ", end='')
@@ -198,21 +201,21 @@ def _checa_eventos():
             fechar()
             exit(0)
 
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            x, y = pygame.mouse.get_pos()
+        elif event.type == pygame.MOUSEBUTTONDOWN:  # se pressionou o botao
+            x, y = pygame.mouse.get_pos()  # posicao do mouse
             if POS_BOTAO[0] <= x <= POS_BOTAO[0] + 50 and (POS_BOTAO[1] <= y <= POS_BOTAO[1] + 50):
-                bool_tocar_musica = not bool_tocar_musica
+                bool_tocar_musica = not bool_tocar_musica  # inverte a musica
                 if bool_tocar_musica:
-                    pygame.mixer.music.unpause()
+                    pygame.mixer.music.unpause()  # despausa
                 else:
-                    pygame.mixer.music.pause()
+                    pygame.mixer.music.pause()  # pausa
                 atualiza_tela(travar_destaque=True)  # ja que mudou na tela
 
             elif POS_BOTAO[0] <= x <= POS_BOTAO[0] + 50 and POS_BOTAO[1] + 50 + 20 <= y <= POS_BOTAO[1] + 50 + 50 + 20:
                 bool_tocar_som = not bool_tocar_som
                 atualiza_tela(travar_destaque=True)  # ja que mudou na tela
 
-            return x, y
+            return x, y  # retorna a posicao do botao para outras funcionalidades sem ser so eventos
     return
 
 
@@ -238,6 +241,7 @@ def _monta_cache_peoes(c):
 
 
 def _desenha_dado(valor):
+    """Desenha so a imagem do dado, com seu valor."""
     imagem = imagens_dado[valor]
     rect_dado = imagem.get_rect()
     rect_dado.x, rect_dado.y = 152, 593
@@ -246,6 +250,7 @@ def _desenha_dado(valor):
 
 
 def _desenha_destaque(pos):
+    """Desenha o fundo do destaque naquela posicao do tabuleiro."""
     x, y = dict_posicoes[pos]
     x += 280
     imagem_peca = imagens_peca['selecao']
@@ -265,7 +270,7 @@ def _desenha_peao(cor, pos):
         return
 
     x, y = dict_posicoes[pos]
-    x += 280
+    x += 280  # x=0 eh do tabuleiro, precisa deslocar a posicao da tela
 
     if cor not in CORES:
         c = COR_DEFAULT
@@ -274,17 +279,20 @@ def _desenha_peao(cor, pos):
 
     # SOBREPOSICAO DE PEOES
     if pos in dict_peoes_multiplos:
+        # pos -> [q, cor1, cor2, cor3...]
         lista = dict_peoes_multiplos[pos]
 
         quantidade_pecas = lista[0]
         posicao_dentro = quantidade_pecas - len(lista) + 1  # 0 até (quantidade - 1)
-        cor = lista.pop(1)  # tira uma cor qualquer da lista.
+        # posicao dentro eh a posicao dentro do quadrado.
 
-        # distribuir igualmente de (5,5) ate (28, 23)
+        cor = lista.pop(1)  # tira uma cor qualquer da lista para pintar
+
+        # distribuir igualmente de (5,5) ate (28, 23) dentro da peca
         pos_x = 23 // (quantidade_pecas - 1) * posicao_dentro + 5 + x
         pos_y = 17 // (quantidade_pecas - 1) * posicao_dentro + 5 + y
 
-        imagem_peca = pygame.transform.scale(imagens_peca[cor], (15, 20))
+        imagem_peca = pygame.transform.scale(imagens_peca[cor], (15, 20))  # 25% do tamanho original
         rect_peao = imagem_peca.get_rect()
         rect_peao.x, rect_peao.y = pos_x, pos_y
 
@@ -294,7 +302,7 @@ def _desenha_peao(cor, pos):
     else:
         imagem_peca = imagens_peca[cor]
         rect_peao = imagem_peca.get_rect()
-        rect_peao.x, rect_peao.y = x + 10, y + 4
+        rect_peao.x, rect_peao.y = x + 10, y + 4  # deslocamento para centralizar no meio
         screen.blit(imagem_peca, rect_peao)
 
 
@@ -333,7 +341,14 @@ def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False, 
         Precis da conexao com a base de dados
     Se destacar for uma lista de ids:
         Esses peoes serao destacados.
-    Se travar_destaque, os destaques nao seram excluidos
+    Se travar_destaque for True:
+        Os destaques nao seram excluidos
+    Se chat for uma string com uma cor:
+        Essa string será exibida no chat com essa cor
+    Se dado for algum inteiro:
+        O dado sera atualizado com esse valor
+        Se for 0:
+            o dado será reiniciado
     """
     global lista_chat, valor_dado_anterior
 
@@ -411,7 +426,7 @@ def escolhe_peao(c, lista):
 
 
 def roda_dado():
-    """Espera ele clicar no dado"""
+    """Fica checando os eventos até ele clicar no dado, saindo da funcao"""
     while True:
         pos = _checa_eventos()
         if pos is not None:  # o mouse foi clicado
@@ -427,8 +442,6 @@ def toca_som(som):
     1 -> Dado
     2 -> Captura
     3 -> Vitoria
-
-
     Não retorna nada.
     """
     global som_peca, som_captura, som_dado, som_vitoria
@@ -452,12 +465,13 @@ def toca_som(som):
 
 
 def fechar():
+    """Fecha o pygame"""
     print("Fechando o jogo")
     pygame.quit()
 
 
 def espera_tempo(ms):
-    """Congela o jogo."""
+    """Congela o jogo pelo tempo determinado"""
     # pygame.time.wait(ms)  # espera ms
     t = time()
     while time() - t <= ms / 1000:

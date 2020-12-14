@@ -1,6 +1,8 @@
 """
 Modulo Partida
-
+    O modolo é executado a partir de uma funcao, inicia partida
+    Esta funcao vai executar todas as outras funcoes internas
+    Chamará os outros módulos do jogo, banco de dados, e a interface gráfica
 Feito por Daniel
 """
 

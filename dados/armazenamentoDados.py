@@ -6,6 +6,7 @@ Funcoes:
     detecta_partida_completa()
     recupera_partida_completa(c)
     salva_partida_completa(c, [dados])
+    exclui_partida_completa
 
 Feita por Daniel
 """
