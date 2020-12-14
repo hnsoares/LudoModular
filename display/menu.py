@@ -125,17 +125,12 @@ def cria_menu():
     texto_num_jogadores = Label(root, text='Escolha o número de jogadores: ', background='grey',
                                 font=('Arial','15','bold'))
 
-
     combo = Combobox(root, width=15, state="readonly", font=('Arial','12','bold'))
     combo['values'] = (2, 3, 4)  # define as escolhas
     combo.current(0)  # deixa a escolha default com o texto
     carregar_button = Button(root, text="Carregar Partida", command=lambda: chama_partida_salva(root), width=20)
     iniciar_button = Button(root, text='Iniciar Partida',
                             command=lambda: chama_partida_nova(root, combo.get()), width=20)
-
-
-    #credenciais_bd = Button(root, text="Configurar credenciais",
-    #command= lambda: alterar_crendenciais_bd(root), width=20)
 
     credenciais_bd = Menu(root)
     credenciais_bd.add_cascade(label='Configurar credenciais', command= lambda: alterar_crendenciais_bd(root))
@@ -144,6 +139,5 @@ def cria_menu():
     iniciar_button.place(x=WIDTH / 2 - 70, y=HEIGHT * 5 / 7)
     carregar_button.place(x=WIDTH / 2 - 70, y=HEIGHT * 5 / 7 + 40)
     combo.place(x=WIDTH / 2 - 85, y=HEIGHT * 5 / 7 - 40)
-    #credenciais_bd.place(x=WIDTH / 2 - 70, y=HEIGHT * 2 / 7 - 100)
     root.config(menu=credenciais_bd)
     root.mainloop()
