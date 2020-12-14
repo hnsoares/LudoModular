@@ -19,7 +19,7 @@ Marcos Vinicius
 * [**Pygame**](https://www.pygame.org/wiki/GettingStarted) Com o Python instalado, é possivel instalar o PyGame através do comando:
 `pip install pygame` ou `python -m pip install pygame`
 * [**MySQL**](https://dev.mysql.com/downloads/installer/) e [**Connector**](https://dev.mysql.com/downloads/connector/python/):
-Durante a instalação do MySQL, é possível instalar o Connector também. Caso não seja possível, este pode ser instalado posteriormente
+Durante a instalação do MySQL, é possível instalar o Connector direto no instalador, ou instalado posteriormente
   através do comando `pip install mysql-connector` ou `python -m pip install mysql-connector`. Além disso, será necessário anotar o usuário
   e senha que foi cadastrado durante a instalação.
 
