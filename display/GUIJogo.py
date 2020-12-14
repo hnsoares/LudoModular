@@ -473,8 +473,6 @@ def exibe_tela_final_e_fecha(vencedores):
 
     atualiza_tela(chat=('', 'default'))
     atualiza_tela(chat=("Fechando em 10s", 'default'))
-    t = time()
-    while time() - t <= 10:  # loop de 10 segundos
-        _checa_eventos()
+    espera_tempo(10*1000)
 
     fechar()
