@@ -458,7 +458,10 @@ def fechar():
 
 def espera_tempo(ms):
     """Congela o jogo."""
-    pygame.time.wait(ms)  # espera ms
+    # pygame.time.wait(ms)  # espera ms
+    t = time()
+    while time() - t <= ms / 1000:
+        _checa_eventos()
 
 
 def exibe_tela_final_e_fecha(vencedores):
