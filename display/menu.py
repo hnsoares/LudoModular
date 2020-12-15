@@ -44,6 +44,7 @@ def alterar_crendenciais_bd(root):
         with open(BD.PATH_CREDENCIAIS, 'r') as file:
             default = file.read().split('\n')
 
+    #cria uma janela para serem colocadas as credenciais
     janela = Toplevel(root)
     janela.title = "Configuração Credenciais"
     janela.geometry("300x300")
@@ -113,7 +114,7 @@ def cria_menu():
     root = Tk()  # cria o elemento root
     root.geometry(FORMATO)
     root.title('LUDO')
-    root.resizable(0, 0)
+    root.resizable(0, 0) #trava o tamanho da janela
     root.configure(background='grey')
 
     logo = PhotoImage(file=ARQUIVO_LOGO_LUDO)
@@ -131,7 +132,6 @@ def cria_menu():
     carregar_button = Button(root, text="Carregar Partida", command=lambda: chama_partida_salva(root), width=20)
     iniciar_button = Button(root, text='Iniciar Partida',
                             command=lambda: chama_partida_nova(root, combo.get()), width=20)
-
     credenciais_bd = Menu(root)
     credenciais_bd.add_cascade(label='Configurar credenciais', command= lambda: alterar_crendenciais_bd(root))
 
