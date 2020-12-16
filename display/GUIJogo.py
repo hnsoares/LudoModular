@@ -7,6 +7,9 @@ Funcoes:
     escolhe_peao(c, lista)
     atualiza_tela(c, [peoes], [destacar])
     fechar()
+    tocar_som(som)
+    espera_tempo(ms)
+    exibe_final_e_fecha(vencedores)
 
 Feita por Daniel
 """
@@ -15,16 +18,43 @@ import pygame
 from os import sep, path  # para achar arquivos
 from dados import baseDados
 from json import load
+from time import time  # para contagem do tempo
 
 TAMANHO_TELA = COMPRIMENTO_TELA, ALTURA_TELA = (1280, 720)  # por enquanto, se trocar, da ruim
 COR_PRETO = (0, 0, 0)
 COR_DEFAULT = (255, 255, 255)  # branco
-CORES = {'yellow': (255, 255, 0), 'red': (255, 0, 0), 'blue': (0, 0, 255), 'green': (0, 255, 0)}
-RAIO_CIRCULO = 24
+CORES = {'yellow': (255, 255, 0), 'red': (255, 0, 0), 'blue': (0, 0, 255), 'green': (0, 255, 0),
+         'default': COR_DEFAULT, 'black': COR_PRETO}
+POS_BOTAO = 20, 20
 
-ARQUIVO_MUSICA = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'musica.wav'])
-ARQUIVO_FUNDO = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'tabuleiro720.png'])
-ARQUIVO_POSICOES = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', 'posicoes.json'])
+# PATHS DE ARQUIVOS A SEREM UTILIZADOS
+LOCAL_ARQUIVOS = sep.join([path.dirname(path.abspath(__file__)), '..', 'assets', ''])
+ARQUIVO_MUSICA = LOCAL_ARQUIVOS + 'musica.ogg'
+ARQUIVO_FUNDO = LOCAL_ARQUIVOS + 'tabuleiro720_2.png'
+ARQUIVO_POSICOES = LOCAL_ARQUIVOS + 'posicoes.json'
+ARQUIVO_SOM_PECA = LOCAL_ARQUIVOS + 'peca.wav'
+ARQUIVO_SOM_CAPTURA = LOCAL_ARQUIVOS + 'captura.wav'
+ARQUIVO_SOM_VITORIA = LOCAL_ARQUIVOS + 'vitoria.wav'
+ARQUIVO_SOM_DADO = LOCAL_ARQUIVOS + 'dado.wav'
+ARQUIVO_BOTAO_MUSICA_ON = LOCAL_ARQUIVOS + 'bmusica_on.png'
+ARQUIVO_BOTAO_MUSICA_OFF = LOCAL_ARQUIVOS + 'bmusica_off.png'
+ARQUIVO_BOTAO_SOM_ON = LOCAL_ARQUIVOS + 'bsom_on.png'
+ARQUIVO_BOTAO_SOM_OFF = LOCAL_ARQUIVOS + 'bsom_off.png'
+ARQUIVO_PECA_VERDE = LOCAL_ARQUIVOS + 'peca_verde.png'
+ARQUIVO_PECA_AZUL = LOCAL_ARQUIVOS + 'peca_azul.png'
+ARQUIVO_PECA_VERMELHO = LOCAL_ARQUIVOS + 'peca_vermelho.png'
+ARQUIVO_PECA_AMARELO = LOCAL_ARQUIVOS + 'peca_amarelo.png'
+ARQUIVO_PECA_SELECAO = LOCAL_ARQUIVOS + 'selecao.png'
+ARQUIVO_DADO_1 = LOCAL_ARQUIVOS + 'dado1.png'
+ARQUIVO_DADO_2 = LOCAL_ARQUIVOS + 'dado2.png'
+ARQUIVO_DADO_3 = LOCAL_ARQUIVOS + 'dado3.png'
+ARQUIVO_DADO_4 = LOCAL_ARQUIVOS + 'dado4.png'
+ARQUIVO_DADO_5 = LOCAL_ARQUIVOS + 'dado5.png'
+ARQUIVO_DADO_6 = LOCAL_ARQUIVOS + 'dado6.png'
+ARQUIVO_DADO_0 = LOCAL_ARQUIVOS + 'dado0.png'
+ARQUIVO_LOGO = LOCAL_ARQUIVOS + 'logo_ludo.png'
+
+# VARIAVEIS GLOBAIS A SEREM INICIALIZADAS
 
 screen = None  # tela a ser configurada
 imagem_fundo = None  # imagem de fundo que vai ser carregada
@@ -33,7 +63,28 @@ dict_peoes = {}  # dicionario para guardar os peoes (cache)
 dict_posicoes = None  # dicionario para posicoes (gerado no inicializar)
 
 font_texto = None
-texto_exemplo = None
+
+bool_tocar_som = True   # se pode tocar som ou nao
+som_peca = None
+som_captura = None
+som_vitoria = None
+som_dado = None
+
+bool_tocar_musica = True  # se pode tocar musica ou nao
+botao_musica_on = None
+botao_musica_off = None
+rect_botao_musica = None
+botao_som_on = None
+botao_som_off = None
+rect_botao_som = None
+
+lista_chat = None   # cada elemento eh [frase, cor]
+
+imagens_peca = {}
+dict_peoes_multiplos = {}
+
+imagens_dado = {}
+valor_dado_anterior = 6  # tanto faz
 
 
 def inicializar(c):
@@ -46,7 +97,12 @@ def inicializar(c):
     Retorna nada.
     """
     global screen, imagem_fundo, rect_imagem_fundo, dict_posicoes
-    global font_texto, texto_exemplo
+    global font_texto
+    global som_peca, som_captura, som_vitoria, som_dado
+    global botao_musica_on, rect_botao_musica, botao_musica_off
+    global botao_som_on, botao_som_off, rect_botao_som
+    global lista_chat
+    global imagens_peca, imagens_dado
 
     print("Iniciando pygame: ", end='')
 
@@ -55,53 +111,111 @@ def inicializar(c):
     pygame.display.set_caption("Ludo")
 
     # MUSICA
+    print("Musica, ", end='')
     pygame.mixer.music.load(ARQUIVO_MUSICA)
     pygame.mixer.music.set_volume(0.01)
-    pygame.mixer.music.play(loops=True, fade_ms=1000)
+    pygame.mixer.music.play(loops=-1, fade_ms=1000)
+
+    # SOM
+    print("Som, ", end='')
+    som_peca = pygame.mixer.Sound(ARQUIVO_SOM_PECA)
+    som_captura = pygame.mixer.Sound(ARQUIVO_SOM_CAPTURA)
+    som_vitoria = pygame.mixer.Sound(ARQUIVO_SOM_VITORIA)
+    som_dado = pygame.mixer.Sound(ARQUIVO_SOM_DADO)
+
+    # BOTOES
+    print("Botoes, ", end='')
+    botao_musica_on = pygame.image.load(ARQUIVO_BOTAO_MUSICA_ON)
+    rect_botao_musica = botao_musica_on.get_rect()
+    rect_botao_musica.x, rect_botao_musica.y = POS_BOTAO
+    botao_musica_off = pygame.image.load(ARQUIVO_BOTAO_MUSICA_OFF)
+
+    botao_som_on = pygame.image.load(ARQUIVO_BOTAO_SOM_ON)
+    rect_botao_som = botao_som_on.get_rect()
+    rect_botao_som.x, rect_botao_som.y = POS_BOTAO[0], POS_BOTAO[1] + 50 + 20
+    botao_som_off = pygame.image.load(ARQUIVO_BOTAO_SOM_OFF)
 
     # FUNDO
+    print("Fundo, ", end='')
     imagem_fundo = pygame.image.load(ARQUIVO_FUNDO)
     rect_imagem_fundo = imagem_fundo.get_rect()
-    rect_imagem_fundo.x = (COMPRIMENTO_TELA - ALTURA_TELA) // 2  # posiciona no centro
+    rect_imagem_fundo.x = 0
+    # (COMPRIMENTO_TELA - ALTURA_TELA) // 2  # posiciona no centro
     rect_imagem_fundo.y = 0
 
     # POSICOES
+    print("Posicoes, ", end='')
     with open(ARQUIVO_POSICOES, 'r') as f:
         # o arquivo esta como 'str': [int, int]. Mas eu quero int: [int, int]
         # por isso, vou converter para inteiro todas as chaves
         # lambda vai ser uma funcao que recebe o dic, e retorna faz um dict comprehension
         # que pega a chave, transforma em int, e atribui ao conteudo, pego atraves de dict.items()
         dict_posicoes = load(f, object_hook=lambda d: {int(a): b for a, b in d.items()})
-    print("DONE")
 
-    print("Carrengando peoes: ", end="")
     _monta_cache_peoes(c)
-    print("DONE")
 
     # TEXTOS
-    font_texto = pygame.font.SysFont('bahnschrift.ttf', 24)
-    texto_exemplo = font_texto.render('F3/F4 -> Pausa/Continua musica', True, COR_DEFAULT)
+    print("Textos, ", end='')
+    font_texto = pygame.font.SysFont('bahnschrift.ttf', 34, bold=False)
+    lista_chat = list()
+    lista_chat.append(("Bem vindo ao Ludo!", 'default'))
+
+    # pecas
+    print("Pecas, ", end='')
+    imagens_peca['red'] = pygame.image.load(ARQUIVO_PECA_VERMELHO)
+    imagens_peca['green'] = pygame.image.load(ARQUIVO_PECA_VERDE)
+    imagens_peca['blue'] = pygame.image.load(ARQUIVO_PECA_AZUL)
+    imagens_peca['yellow'] = pygame.image.load(ARQUIVO_PECA_AMARELO)
+    imagens_peca['selecao'] = pygame.image.load(ARQUIVO_PECA_SELECAO)
+
+    # DADOS
+    print("Dados, ", end='')
+    imagens_dado[1] = pygame.image.load(ARQUIVO_DADO_1)
+    imagens_dado[2] = pygame.image.load(ARQUIVO_DADO_2)
+    imagens_dado[3] = pygame.image.load(ARQUIVO_DADO_3)
+    imagens_dado[4] = pygame.image.load(ARQUIVO_DADO_4)
+    imagens_dado[5] = pygame.image.load(ARQUIVO_DADO_5)
+    imagens_dado[6] = pygame.image.load(ARQUIVO_DADO_6)
+    imagens_dado[0] = pygame.image.load(ARQUIVO_DADO_0)
+
+    # LOGO
+    print("Logo, ", end='')
+    imagem_logo = pygame.transform.scale(pygame.image.load(ARQUIVO_LOGO), (32, 32))
+    pygame.display.set_icon(imagem_logo)
+
+    print("\nFINALIZADO.")
+    return
 
 
 def _checa_eventos():
     """
     Verifica a interacao com a interface grafica.
     Se o jogo fechar, ele fecha sem salvar.
-    F3 e F4 pausam e continuam a musica.
     Retorna a posicao do mouse se houver algum clique.
     Senao, retorna nada.
     """
+    global bool_tocar_musica, bool_tocar_som
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             fechar()
             exit(0)
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_F3:
-                pygame.mixer.music.pause()
-            elif event.key == pygame.K_F4:
-                pygame.mixer.music.unpause()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            return pygame.mouse.get_pos()
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:  # se pressionou o botao
+            x, y = pygame.mouse.get_pos()  # posicao do mouse
+            if POS_BOTAO[0] <= x <= POS_BOTAO[0] + 50 and (POS_BOTAO[1] <= y <= POS_BOTAO[1] + 50):
+                bool_tocar_musica = not bool_tocar_musica  # inverte a musica
+                if bool_tocar_musica:
+                    pygame.mixer.music.unpause()  # despausa
+                else:
+                    pygame.mixer.music.pause()  # pausa
+                atualiza_tela(travar_destaque=True)  # ja que mudou na tela
+
+            elif POS_BOTAO[0] <= x <= POS_BOTAO[0] + 50 and POS_BOTAO[1] + 50 + 20 <= y <= POS_BOTAO[1] + 50 + 50 + 20:
+                bool_tocar_som = not bool_tocar_som
+                atualiza_tela(travar_destaque=True)  # ja que mudou na tela
+
+            return x, y  # retorna a posicao do botao para outras funcionalidades sem ser so eventos
     return
 
 
@@ -120,15 +234,35 @@ def _monta_cache_peoes(c):
     cursor.execute(q)
 
     for f in cursor.fetchall():
-        dict_peoes[int(f['id'])] = [f['cor'], int(f['pos'])]  # dicionario para o cache interno
+        dict_peoes[int(f['id'])] = [f['cor'], int(f['pos']), False]  # dicionario para o cache interno
+        # o terceiro termo diz se o peao esta destacado ou nao
     cursor.close()
     return
 
 
-def _desenha_peao(cor, pos, destacar=False):
+def _desenha_dado(valor):
+    """Desenha so a imagem do dado, com seu valor."""
+    imagem = imagens_dado[valor]
+    rect_dado = imagem.get_rect()
+    rect_dado.x, rect_dado.y = 152, 593
+    screen.blit(imagem, rect_dado)
+    return
+
+
+def _desenha_destaque(pos):
+    """Desenha o fundo do destaque naquela posicao do tabuleiro."""
+    x, y = dict_posicoes[pos]
+    x += 280
+    imagem_peca = imagens_peca['selecao']
+    rect_peao = imagem_peca.get_rect()
+    rect_peao.x, rect_peao.y = x - 1, y - 1
+    screen.blit(imagem_peca, rect_peao)
+    return
+
+
+def _desenha_peao(cor, pos):
     """
     Tenta desenhar um peao na tela.
-    Se destacar for True, o peao sera destacado
     Se nao conseguir desenhar, nao desenha.
     """
     if pos not in dict_posicoes:  # acha a posicao
@@ -136,15 +270,61 @@ def _desenha_peao(cor, pos, destacar=False):
         return
 
     x, y = dict_posicoes[pos]
-    x += 280
+    x += 280  # x=0 eh do tabuleiro, precisa deslocar a posicao da tela
+
     if cor not in CORES:
         c = COR_DEFAULT
     else:
         c = CORES[cor]
 
-    pygame.draw.circle(screen, c, (x, y), RAIO_CIRCULO)
-    if destacar:
-        pygame.draw.circle(screen, COR_DEFAULT, (x, y), RAIO_CIRCULO, width=RAIO_CIRCULO // 4)
+    # SOBREPOSICAO DE PEOES
+    if pos in dict_peoes_multiplos:
+        # pos -> [q, cor1, cor2, cor3...]
+        lista = dict_peoes_multiplos[pos]
+
+        quantidade_pecas = lista[0]
+        posicao_dentro = quantidade_pecas - len(lista) + 1  # 0 até (quantidade - 1)
+        # posicao dentro eh a posicao dentro do quadrado.
+
+        cor = lista.pop(1)  # tira uma cor qualquer da lista para pintar
+
+        # distribuir igualmente de (5,5) ate (28, 23) dentro da peca
+        pos_x = 23 // (quantidade_pecas - 1) * posicao_dentro + 5 + x
+        pos_y = 17 // (quantidade_pecas - 1) * posicao_dentro + 5 + y
+
+        imagem_peca = pygame.transform.scale(imagens_peca[cor], (15, 20))  # 25% do tamanho original
+        rect_peao = imagem_peca.get_rect()
+        rect_peao.x, rect_peao.y = pos_x, pos_y
+
+        screen.blit(imagem_peca, rect_peao)
+    # FIM DA SOBREPOSICAO DE PEOES
+
+    else:
+        imagem_peca = imagens_peca[cor]
+        rect_peao = imagem_peca.get_rect()
+        rect_peao.x, rect_peao.y = x + 10, y + 4  # deslocamento para centralizar no meio
+        screen.blit(imagem_peca, rect_peao)
+
+
+def _monta_peoes_multiplos():
+    """Monta o dicionario com as posicoes, e os peoes que tem la (so se tiver mais de 1)"""
+    global dict_peoes_multiplos
+
+    dict_peoes_multiplos.clear()
+    dict_temp = {}
+    for p in dict_peoes:
+        cor = dict_peoes[p][0]
+        pos = dict_peoes[p][1]
+        if pos not in dict_temp:
+            dict_temp[pos] = [cor]
+        else:
+            dict_temp[pos].append(cor)
+
+    for d in dict_temp:
+        if len(dict_temp[d]) > 1:
+            dict_peoes_multiplos[d] = [len(dict_temp[d])] + dict_temp[d]   # [q, cor1, cor2, cor3...]
+
+    return
 
 
 def _atualiza_peao(c, i):
@@ -153,35 +333,78 @@ def _atualiza_peao(c, i):
     dict_peoes[i][1] = p['pos']
 
 
-def atualiza_tela(c, atualizar=None, destacar=None):
+def atualiza_tela(c=None, atualizar=None, destacar=None, travar_destaque=False, chat=None, dado=None):
     """
     Atualiza a tela da interface do jogo.
     Se atualizar for uma lista de ids:
         Esses peoes serao atualizados
+        Precis da conexao com a base de dados
     Se destacar for uma lista de ids:
         Esses peoes serao destacados.
+    Se travar_destaque for True:
+        Os destaques nao seram excluidos
+    Se chat for uma string com uma cor:
+        Essa string será exibida no chat com essa cor
+    Se dado for algum inteiro:
+        O dado sera atualizado com esse valor
+        Se for 0:
+            o dado será reiniciado
     """
+    global lista_chat, valor_dado_anterior
 
-    screen.fill(COR_PRETO)  # fundo preto
+    # screen.fill(COR_PRETO)  # fundo preto
     screen.blit(imagem_fundo, rect_imagem_fundo)  # imagem de fundo
+    if bool_tocar_musica:
+        screen.blit(botao_musica_on, rect_botao_musica)
+    else:
+        screen.blit(botao_musica_off, rect_botao_musica)
+
+    if bool_tocar_som:
+        screen.blit(botao_som_on, rect_botao_som)
+    else:
+        screen.blit(botao_som_off, rect_botao_som)
+
+    if dado is not None:
+        valor_dado_anterior = dado
+    _desenha_dado(valor_dado_anterior)
 
     if atualizar is not None:  # atualiza os peoes no cache
         for p in atualizar:
             _atualiza_peao(c, p)
 
-    for p in dict_peoes:  # desenha todos os peoes.
-        peao = dict_peoes[p]
-        if destacar is not None:  # tem que verificar se aquele peao eh destacavel
-            _desenha_peao(peao[0], peao[1], p in destacar)  # p in destacar eh true se ele deve ser destacado
-        else:
-            _desenha_peao(peao[0], peao[1])  # se nao, joga tudo como false
+    if destacar is not None:  # prepara os peoes a serem destacados
+        for p in destacar:
+            dict_peoes[p][2] = True
 
-    texto_exemplo_rect = texto_exemplo.get_rect()
-    texto_exemplo_rect.x, texto_exemplo_rect.y = 0, 0
-    screen.blit(texto_exemplo, texto_exemplo_rect)
+    _monta_peoes_multiplos()  # cria o dicionario como peoes multiplos, pra o desenho usar
+
+    for p in dict_peoes:  # PRIMEIRA PASSAGEM (DESENHA OS DESTAQUES):
+        peao = dict_peoes[p]
+        if peao[2]:
+            _desenha_destaque(peao[1])
+
+    for p in dict_peoes:  # SEGUNDA PASSAGEM (DESENHA OS PEOES):
+        peao = dict_peoes[p]
+        _desenha_peao(peao[0], peao[1])
+
+        if destacar is not None:
+            if p not in destacar:
+                dict_peoes[p][2] = False
+        elif not travar_destaque:
+            dict_peoes[p][2] = False
+
+    if chat is not None:
+        lista_chat.insert(0, chat)
+        if len(lista_chat) == 15:
+            lista_chat.pop()
+
+    for i, (frase, cor) in enumerate(lista_chat):
+        texto = font_texto.render(frase, True, CORES[cor])
+        rect_texto = texto.get_rect()
+        rect_texto.x, rect_texto.y = (COMPRIMENTO_TELA + ALTURA_TELA) // 2 + 10, ALTURA_TELA - 30 - 30 * i
+        screen.blit(texto, rect_texto)
 
     pygame.display.flip()  # atualiza a tela
-    pygame.time.wait(500)  # espera 500ms
 
 
 def escolhe_peao(c, lista):
@@ -198,13 +421,72 @@ def escolhe_peao(c, lista):
             for i, pos1 in enumerate(posicoes_lista):
                 x1, y1 = pos1  # posicao do peao
                 x1 += 280  # offset do canto da tela (deve ser corrigido se alterar as posicoes
-                dist = (x - x1) ** 2 + (
-                            y - y1) ** 2  # distancia do clique do mouse deve ser menor que o raio do circulo
-                # print(dist, x, y, x1, y1)
-                if dist <= RAIO_CIRCULO ** 2:
+                if x1 <= x <= x1 + 48 and y1 <= y <= y1 + 48:
                     return i
 
 
+def roda_dado():
+    """Fica checando os eventos até ele clicar no dado, saindo da funcao"""
+    while True:
+        pos = _checa_eventos()
+        if pos is not None:  # o mouse foi clicado
+            x, y = pos
+            if 152 <= x <= 252 and 593 <= y <= 693:
+                return
+
+
+def toca_som(som):
+    """
+    Toca o som se ele estiver ligado.
+    0 -> Peça
+    1 -> Dado
+    2 -> Captura
+    3 -> Vitoria
+    Não retorna nada.
+    """
+    global som_peca, som_captura, som_dado, som_vitoria
+
+    if not bool_tocar_som:
+        return
+
+    if som == 0:
+        som_peca.play()
+
+    elif som == 1:
+        som_dado.play()
+
+    elif som == 2:
+        som_captura.play()
+
+    elif som == 3:
+        som_vitoria.play()
+
+    return
+
+
 def fechar():
+    """Fecha o pygame"""
     print("Fechando o jogo")
     pygame.quit()
+
+
+def espera_tempo(ms):
+    """Congela o jogo pelo tempo determinado"""
+    # pygame.time.wait(ms)  # espera ms
+    t = time()
+    while time() - t <= ms / 1000:
+        _checa_eventos()
+
+
+def exibe_tela_final_e_fecha(vencedores):
+    """Exibe tela de vitoria e fecha o jogo depois de 10 segundos."""
+    atualiza_tela(chat=("Jogo encerrado!", 'default'))
+    atualiza_tela(chat=("Ranking", 'default'))
+    for i, vencedor in enumerate(vencedores):
+        atualiza_tela(chat=("%d°: %s" % (i + 1, vencedor), vencedor))  # imprime os vencedores
+
+    atualiza_tela(chat=('', 'default'))
+    atualiza_tela(chat=("Fechando em 10s", 'default'))
+    espera_tempo(10*1000)
+
+    fechar()

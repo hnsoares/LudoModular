@@ -6,6 +6,7 @@ Funcoes:
     detecta_partida_completa()
     recupera_partida_completa(c)
     salva_partida_completa(c, [dados])
+    exclui_partida_completa
 
 Feita por Daniel
 """
@@ -13,7 +14,7 @@ Feita por Daniel
 from dados import baseDados
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from os import path, sep  # so para o armazenamento funcionar e para remover uma partida salva
+from os import path, sep, remove  # so para o armazenamento funcionar e para remover uma partida salva
 
 PATH = path.dirname(path.abspath(__file__)) + sep + 'arquivos' + sep
 ARQUIVO_PARTIDA = 'partida.xml'
@@ -204,8 +205,18 @@ def recupera_partida_completa(c):
     for dado in dados:
         # print(dado.tag, dado.attrib['tipo'], dado.text)
         if dado.attrib['tipo'] == 'list':
-            dicionario_dados[dado.tag] = [_converte_objeto(x, dado.attrib['subtipo']) for x in dado.text.split(",")]
+            if dado.text is None:
+                dicionario_dados[dado.tag] = []
+            else:
+                dicionario_dados[dado.tag] = [_converte_objeto(x, dado.attrib['subtipo']) for x in dado.text.split(",")]
         else:
             dicionario_dados[dado.tag] = _converte_objeto(dado.text, dado.attrib['tipo'])
 
     return dicionario_dados
+
+
+def exclui_partida_completa():
+    nome_arquivo = PATH + ARQUIVO_PARTIDA
+    if detecta_partida_completa():
+        remove(nome_arquivo)
+    return

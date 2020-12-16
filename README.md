@@ -4,45 +4,53 @@ Henrique Soares
 João Vitor Santana    
 Marcos Vinicius
 
-## Build 3 - 16/11
+----
+## Build 4 - 16/11
 ### Entrega estabelecida
-* Jogo funcional
-* Parte da interface gráfica
+* Jogo completo
 
 ### Conteudos da Build
-* Jogo funcional
-* Salvamento automático, e recuperação de partida em andamento
-* Interface básica do menu
-* Interface básica do jogo
+* Jogo completo e funcionando
 
+----
 ### Requerimentos
 * [**Python 3**](https://python.org) 
-* [**Pygame**](https://www.pygame.org/wiki/GettingStarted): Se já tiver o python instalado, é possivel instalar rodando o comando
-`pip install pygame`
+
+* [**Pygame**](https://www.pygame.org/wiki/GettingStarted) Com o Python instalado, é possivel instalar o PyGame através do comando:
+`pip install pygame` ou `python -m pip install pygame`
 * [**MySQL**](https://dev.mysql.com/downloads/installer/) e [**Connector**](https://dev.mysql.com/downloads/connector/python/):
-Siga as instruções do instalador. Anote a sua conta/senha ao instalar. Será necessário para configurar o banco de dados, para o jogo conseguir armazenar os dados do jogo.
+Durante a instalação do MySQL, é possível instalar o Connector direto no instalador, ou instalado posteriormente
+  através do comando `pip install mysql-connector` ou `python -m pip install mysql-connector`. Além disso, será necessário anotar o usuário
+  e senha que foi cadastrado durante a instalação.
 
+Os demais módulos utilizados já estão instalados na distribuição padrão do Python: 
+**xml**, **json**, **os**, **tkinter**, **random**, **datetime**, **unittest** e **time**.
 
-Os outros módulos já estão instalados no python: **xml**, **json**, **os**, **tkinter**, **random**, **datetime** e **unittest**.
-
+----
 ### Como jogar
-Antes de jogar, primeiro você precisa criar um arquivo `dados/arquivos/credenciais.txt`, contendo as credenciais anotadas nas instalação do MySQL, da seguinte maneira:
-    
-    host (localhost)
-    usuario
-    senha
+Para iniciar o jogo, é preciso executar o arquivo `main.py`
 
-Mais informações no arquivo `dados/arquivos/exemplo_credenciais.txt`
+Ao executar o programa, ele abrirá uma tela de menu. Nesta tela, é possível criar uma partida de dois a quatro jogadores ou carregar uma partida anterior.
+ Também é possível configurar a conexão com a base de dados, essencial ao funcionamento do jogo. Para isso, é necessário acessar a tela de configuração, que permite
+ configurar o usuário, senha e servidor de conexão com a base de dados.
 
-Após isso, execute o arquivo `main.py`. Abrirá uma tela contendo algumas opções. Você pode criar um novo jogo escolhendo uma quantidade
-de jogadores, ou carregar alguma partida anterior, se houver.
+Ao iniciar ou carregar uma partida, a tela de menu será fechada, e abrirá uma tela com o jogo. As cores dos jogadores são pré-selecionadas.
 
-No jogo, o dado por é rodado automaticamente (seu valor, por enquanto, é exibido no `stdin`, não na tela). Os peões que você
-pode escolher se destacarão, e ao clicar em um deles, ele será movimentado. Se não houver, a vez será passada automaticamente.
+Durante o jogo, é possível desabilitar os efeitos sonoros, assim como a música, através dos botões a esquerda.
 
-Você pode sair do jogo em qualquer momento que ele será guardado.
+Para interagir no jogo, é preciso utilizar o mouse para selecionar qual peão mover, ou para jogar o dado.
 
-Se quiser parar a música, clique `F3`. Se quiser continuar a música, clique `F4`.
+O jogo pode ser interrompido em qualquer momento ao fechar a tela de jogo. Ele poderá ser recuperado a partir da última rodada jogada.
 
+Ao finalizar uma partida, será exibido o placar dos vencedores, e o jogo será fechado automaticamente.
+
+----
 ### Testes
 O arquivo de testes está em `testes/teste.py`. Ao executar, ele fará todos os testes dos jogos automaticamente.
+
+----
+### Créditos
+* **Música**: *Glass House - UTAH*
+* **Efeitos sonoros**: *Chess.com*
+* **Imagens**: *Feitos por Daniel e Marcos, através do programa **Inkscape***
+* **Logo**: *Feito por Henrique*

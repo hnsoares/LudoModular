@@ -165,7 +165,9 @@ def movimentacao_possivel(c, id_peao, mov):
     eh_inicio = p['eh_inicio']
     eh_finalizado = p['eh_finalizado']
 
-    if eh_finalizado:  # se ele ja acabou o jogo
+    if eh_finalizado or (pos >= 1000 and pos % 1000 == 5):  # se ele ja acabou o jogo
+        # essa verificacao da posicao novamente foi colocada
+        # pois um fechamento indevido pode acabar não salvando o estado do peao. Por isso, eh uma redundancia
         return 2
 
     if eh_inicio:  # se ele esta na base ainda
